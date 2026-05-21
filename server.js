@@ -217,21 +217,25 @@ function tickRoom(code, room) {
     p.vx *= FRICTION_PLAYER; p.vy *= FRICTION_PLAYER;
     p.x  += p.vx;            p.y  += p.vy;
     clampPlayer(p, room.field);
-    if (room.kickoffPending && p.team !== room.kickoffTeam) {
+    if (room.kickoffPending) {
       const cx = (room.field.left + room.field.right) / 2;
       const cy = (room.field.top  + room.field.bottom) / 2;
-      if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
+      // both teams stay in their own half
       if (p.team === 'red'  && p.x + p.radius > cx) { p.x = cx - p.radius; if (p.vx > 0) p.vx = 0; }
-      const cdx = p.x - cx, cdy = p.y - cy;
-      const cdist = Math.hypot(cdx, cdy);
-      const minDist = 58 + p.radius;
-      if (cdist < minDist) {
-        const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
-        const ny = cdist > 0.001 ? cdy / cdist : 0;
-        p.x = cx + nx * minDist;
-        p.y = cy + ny * minDist;
-        const vel = p.vx * nx + p.vy * ny;
-        if (vel < 0) { p.vx -= vel * nx; p.vy -= vel * ny; }
+      if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
+      // non-kickoff team also can't enter the center circle
+      if (p.team !== room.kickoffTeam) {
+        const cdx = p.x - cx, cdy = p.y - cy;
+        const cdist = Math.hypot(cdx, cdy);
+        const minDist = 58 + p.radius;
+        if (cdist < minDist) {
+          const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
+          const ny = cdist > 0.001 ? cdy / cdist : 0;
+          p.x = cx + nx * minDist;
+          p.y = cy + ny * minDist;
+          const vel = p.vx * nx + p.vy * ny;
+          if (vel < 0) { p.vx -= vel * nx; p.vy -= vel * ny; }
+        }
       }
     }
   }
