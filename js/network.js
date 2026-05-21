@@ -21,10 +21,9 @@ function netConnect() {
 
   socket.on('room-created', ({ code, team }) => {
     myTeam = team;
-    document.getElementById('net-status').textContent = `Room created: ${code}`;
     document.getElementById('net-code-display').textContent = code;
-    document.getElementById('net-waiting').style.display = 'block';
-    document.getElementById('net-join-panel').style.display = 'none';
+    document.getElementById('net-waiting').style.display = 'flex';
+    document.getElementById('online-cols').style.display = 'none';
   });
 
   socket.on('player-joined', ({ names }) => {
@@ -36,7 +35,6 @@ function netConnect() {
 
   socket.on('room-joined', ({ code, team }) => {
     myTeam = team;
-    document.getElementById('net-status').textContent = `Joined room ${code}`;
     startOnlineGame();
   });
 
