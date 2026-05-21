@@ -49,4 +49,4 @@ const BALL_MAX_SPD        = 30;
 // ─── Game timing ─────────────────────────────────────────────────────────────
 
 const GAME_DURATION  = 180;  // seconds
-const GOAL_PAUSE_MS  = 2200;
+const GOAL_PAUSE_MS  = 1000;

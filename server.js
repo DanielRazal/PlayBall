@@ -26,7 +26,7 @@ const KICK_IMPULSE      = 14;
 const KICK_RANGE        = PLAYER_R + BALL_R + 12;
 const KICK_COOLDOWN     = 120;
 const BALL_MAX_SPD      = 30;
-const GOAL_PAUSE_MS     = 2200;
+const GOAL_PAUSE_MS     = 1000;
 const TICK_RATE         = 60;   // server ticks per second
 
 const FIELD_SIZES = {
