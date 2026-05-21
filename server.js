@@ -64,6 +64,7 @@ function createRoom(settings) {
     goalDeep: fs.goalDeep,
     score:          { red: 0, blue: 0 },
     goldenGoal:     false,
+    kickoffTeam:    'red',
     kickoffPending: true,
     timeLeft:       settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
     goalTimer: 0,
@@ -91,8 +92,9 @@ function applyInput(p) {
   if (spd > PLAYER_MAX_SPD) { p.vx = p.vx / spd * PLAYER_MAX_SPD; p.vy = p.vy / spd * PLAYER_MAX_SPD; }
 }
 
-function applyKick(p, b, now) {
+function applyKick(p, b, now, room) {
   if (!p.keys.kick) return;
+  if (room && room.kickoffPending && p.team !== room.kickoffTeam) return;
   const dx = b.x - p.x, dy = b.y - p.y;
   const dist = Math.hypot(dx, dy);
   if (dist > KICK_RANGE || now - p.lastKickTime < KICK_COOLDOWN) return;
@@ -163,6 +165,7 @@ function broadcast(code, room) {
     phase:          room.phase,
     score:          room.score,
     goldenGoal:     room.goldenGoal,
+    kickoffTeam:    room.kickoffTeam,
     kickoffPending: room.kickoffPending,
     timeLeft:       room.timeLeft,
     goalTimer:  room.goalTimer,
@@ -214,6 +217,11 @@ function tickRoom(code, room) {
     p.vx *= FRICTION_PLAYER; p.vy *= FRICTION_PLAYER;
     p.x  += p.vx;            p.y  += p.vy;
     clampPlayer(p, room.field);
+    if (room.kickoffPending && p.team !== room.kickoffTeam) {
+      const cx = (room.field.left + room.field.right) / 2;
+      if (p.team === 'blue' && p.x < cx) { p.x = cx; if (p.vx < 0) p.vx = 0; }
+      if (p.team === 'red'  && p.x > cx) { p.x = cx; if (p.vx > 0) p.vx = 0; }
+    }
   }
 
   // Ball
@@ -223,12 +231,12 @@ function tickRoom(code, room) {
   b.angle += Math.hypot(b.vx, b.vy) * 0.06;
 
   resolveBallWalls(room);
-  applyKick(p0, b, now); applyKick(p1, b, now);
+  applyKick(p0, b, now, room); applyKick(p1, b, now, room);
   resolveCollision(p0, b); resolveCollision(p1, b); resolveCollision(p0, p1);
 
   if (room.kickoffPending) {
     for (const p of room.players) {
-      if (Math.hypot(b.x - p.x, b.y - p.y) < p.radius + b.radius + 1) {
+      if (p.team === room.kickoffTeam && Math.hypot(b.x - p.x, b.y - p.y) < p.radius + b.radius + 1) {
         room.kickoffPending = false;
         break;
       }
@@ -254,6 +262,7 @@ function triggerGoal(code, room, team) {
     if (limit > 0 && room.score[team] >= limit) {
       room.phase = 'gameover';
     } else {
+      room.kickoffTeam    = team === 'red' ? 'blue' : 'red';
       room.kickoffPending = true;
       resetBall(room);
       resetPlayers(room);

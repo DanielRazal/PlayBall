@@ -4,6 +4,7 @@
 
 function applyKick(p) {
   if (!p.keys.kick) { p.kickJustPressed = false; return; }
+  if (state.kickoffPending && p.team !== state.kickoffTeam) return;
 
   const now  = performance.now();
   const b    = state.ball;

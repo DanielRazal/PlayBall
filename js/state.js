@@ -6,6 +6,7 @@ const state = {
   phase: 'menu',   // 'menu' | 'playing' | 'goal' | 'gameover' | 'paused'
   goldenGoal: false,
   kickoffPending: false,
+  kickoffTeam: 'red',
   mode:  '2p',
   score: { red: 0, blue: 0 },
   timeLeft:  GAME_DURATION,

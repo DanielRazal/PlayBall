@@ -49,6 +49,7 @@ function netConnect() {
     state.phase          = s.phase;
     state.score          = s.score;
     state.goldenGoal     = s.goldenGoal;
+    state.kickoffTeam    = s.kickoffTeam;
     state.kickoffPending = s.kickoffPending;
     state.timeLeft       = s.timeLeft;
     state.goalTimer      = s.goalTimer;
