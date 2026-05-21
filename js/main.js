@@ -20,8 +20,13 @@ function setupInput() {
     }
     const m = KEY_MAP[e.code];
     if (m) {
-      const idx = resolvePlayerIdx(m.p);
-      state.players[idx].keys[m.a] = true;
+      if (isOnline()) {
+        const myP = state.players.find(p => p.team === getMyTeam());
+        if (myP) myP.keys[m.a] = true;
+      } else {
+        const idx = resolvePlayerIdx(m.p);
+        state.players[idx].keys[m.a] = true;
+      }
     }
   });
 
@@ -29,8 +34,13 @@ function setupInput() {
     if (document.activeElement === document.getElementById('chat-input')) return;
     const m = KEY_MAP[e.code];
     if (m) {
-      const idx = resolvePlayerIdx(m.p);
-      state.players[idx].keys[m.a] = false;
+      if (isOnline()) {
+        const myP = state.players.find(p => p.team === getMyTeam());
+        if (myP) myP.keys[m.a] = false;
+      } else {
+        const idx = resolvePlayerIdx(m.p);
+        state.players[idx].keys[m.a] = false;
+      }
     }
   });
 
