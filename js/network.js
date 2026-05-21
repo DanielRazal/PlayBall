@@ -46,10 +46,11 @@ function netConnect() {
     if (!onlineMode) return;
     // Apply server authoritative state
     const wasGolden = state.goldenGoal;
-    state.phase      = s.phase;
-    state.score      = s.score;
-    state.goldenGoal = s.goldenGoal;
-    state.timeLeft   = s.timeLeft;
+    state.phase          = s.phase;
+    state.score          = s.score;
+    state.goldenGoal     = s.goldenGoal;
+    state.kickoffPending = s.kickoffPending;
+    state.timeLeft       = s.timeLeft;
     state.goalTimer  = s.goalTimer;
     if (s.names) state.names = s.names;
     if (!wasGolden && s.goldenGoal) showGoldenGoalNotice();

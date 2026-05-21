@@ -192,7 +192,8 @@ function gameLoop(timestamp) {
   } else if (state.phase === 'goal') {
     state.goalTimer -= dt * 1000;
     if (state.goalTimer <= 0) {
-      state.phase = 'playing';
+      state.phase          = 'playing';
+      state.kickoffPending = true;
       resetBall();
       resetPlayers();
       hideOverlay();

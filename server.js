@@ -62,9 +62,10 @@ function createRoom(settings) {
     field,
     goalH:    fs.goalH,
     goalDeep: fs.goalDeep,
-    score:      { red: 0, blue: 0 },
-    goldenGoal: false,
-    timeLeft:   settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
+    score:          { red: 0, blue: 0 },
+    goldenGoal:     false,
+    kickoffPending: true,
+    timeLeft:       settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
     goalTimer: 0,
     names:    { red: 'Red', blue: 'Blue' },
     sockets:  { red: null, blue: null },
@@ -159,10 +160,11 @@ function resetPlayers(room) {
 
 function broadcast(code, room) {
   io.to(code).emit('state', {
-    phase:      room.phase,
-    score:      room.score,
-    goldenGoal: room.goldenGoal,
-    timeLeft:   room.timeLeft,
+    phase:          room.phase,
+    score:          room.score,
+    goldenGoal:     room.goldenGoal,
+    kickoffPending: room.kickoffPending,
+    timeLeft:       room.timeLeft,
     goalTimer:  room.goalTimer,
     names:      room.names,
     ball:      { x: room.ball.x, y: room.ball.y, vx: room.ball.vx, vy: room.ball.vy, angle: room.ball.angle },
@@ -178,7 +180,8 @@ function tickRoom(code, room) {
   if (room.phase === 'goal') {
     room.goalTimer -= dt * 1000;
     if (room.goalTimer <= 0) {
-      room.phase = 'playing';
+      room.phase          = 'playing';
+      room.kickoffPending = true;
       resetBall(room);
       resetPlayers(room);
     }
@@ -190,7 +193,7 @@ function tickRoom(code, room) {
 
   // Timer
   if (room.timeLeft !== Infinity) {
-    room.timeLeft -= dt;
+    if (!room.kickoffPending) room.timeLeft -= dt;
     if (room.timeLeft <= 0) {
       room.timeLeft = 0;
       if (room.score.red === room.score.blue) {
@@ -222,6 +225,15 @@ function tickRoom(code, room) {
   resolveBallWalls(room);
   applyKick(p0, b, now); applyKick(p1, b, now);
   resolveCollision(p0, b); resolveCollision(p1, b); resolveCollision(p0, p1);
+
+  if (room.kickoffPending) {
+    for (const p of room.players) {
+      if (Math.hypot(b.x - p.x, b.y - p.y) < p.radius + b.radius + 1) {
+        room.kickoffPending = false;
+        break;
+      }
+    }
+  }
 
   // Goal check
   const gt = goalTop(room), gb = goalBot(room);

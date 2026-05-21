@@ -45,11 +45,12 @@ function startGame(mode) {
   state.players[1].team = ai;
   state.players[1].isAI = (mode === 'ai');
 
-  state.mode       = mode;
-  state.score      = { red: 0, blue: 0 };
-  state.timeLeft   = state.settings.timeMins > 0 ? state.settings.timeMins * 60 : Infinity;
-  state.goldenGoal = false;
-  state.phase      = 'playing';
+  state.mode           = mode;
+  state.score          = { red: 0, blue: 0 };
+  state.timeLeft       = state.settings.timeMins > 0 ? state.settings.timeMins * 60 : Infinity;
+  state.goldenGoal     = false;
+  state.kickoffPending = true;
+  state.phase          = 'playing';
   resetBall();
   resetPlayers();
   updateHUD();
@@ -86,6 +87,15 @@ function updatePhysics() {
   resolveCircleCollision(p0, b);
   resolveCircleCollision(p1, b);
   resolveCircleCollision(p0, p1);
+
+  if (state.kickoffPending) {
+    for (const p of state.players) {
+      if (Math.hypot(b.x - p.x, b.y - p.y) < p.radius + b.radius + 1) {
+        state.kickoffPending = false;
+        break;
+      }
+    }
+  }
 
   checkGoal();
 }
@@ -131,7 +141,7 @@ function updateTimer(dt) {
     elTimer().textContent = '∞';
     return;
   }
-  state.timeLeft -= dt;
+  if (!state.kickoffPending) state.timeLeft -= dt;
   if (state.timeLeft <= 0) {
     state.timeLeft = 0;
     if (state.score.red === state.score.blue) {
