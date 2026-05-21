@@ -45,10 +45,11 @@ function startGame(mode) {
   state.players[1].team = ai;
   state.players[1].isAI = (mode === 'ai');
 
-  state.mode     = mode;
-  state.score    = { red: 0, blue: 0 };
-  state.timeLeft = state.settings.timeMins > 0 ? state.settings.timeMins * 60 : Infinity;
-  state.phase    = 'playing';
+  state.mode       = mode;
+  state.score      = { red: 0, blue: 0 };
+  state.timeLeft   = state.settings.timeMins > 0 ? state.settings.timeMins * 60 : Infinity;
+  state.goldenGoal = false;
+  state.phase      = 'playing';
   resetBall();
   resetPlayers();
   updateHUD();
@@ -105,6 +106,12 @@ function triggerGoal(team) {
   state.lastGoalTeam = team;
   updateHUD();
 
+  if (state.goldenGoal) {
+    state.phase = 'gameover';
+    showGameOver();
+    return;
+  }
+
   const limit = state.settings.scoreLimit;
   if (limit > 0 && state.score[team] >= limit) {
     state.phase = 'gameover';
@@ -127,7 +134,14 @@ function updateTimer(dt) {
   state.timeLeft -= dt;
   if (state.timeLeft <= 0) {
     state.timeLeft = 0;
-    endGame();
+    if (state.score.red === state.score.blue) {
+      state.goldenGoal = true;
+      state.timeLeft = Infinity;
+      elTimer().textContent = 'GG';
+      showGoldenGoalNotice();
+    } else {
+      endGame();
+    }
   }
   const mins = Math.floor(state.timeLeft / 60);
   const secs = Math.floor(state.timeLeft % 60);
@@ -192,6 +206,16 @@ function showPause() {
 
 function hideOverlay() {
   elOverlay().classList.add('hidden');
+}
+
+function showGoldenGoalNotice() {
+  elOverlay().classList.remove('hidden');
+  elTitle().textContent = 'GOLDEN GOAL!';
+  elMsg().textContent   = 'Next goal wins';
+  setOverlayMode('golden');
+  setTimeout(() => {
+    if (state.goldenGoal && state.phase === 'playing') hideOverlay();
+  }, 2500);
 }
 
 function endGame() {

@@ -62,8 +62,9 @@ function createRoom(settings) {
     field,
     goalH:    fs.goalH,
     goalDeep: fs.goalDeep,
-    score:    { red: 0, blue: 0 },
-    timeLeft: settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
+    score:      { red: 0, blue: 0 },
+    goldenGoal: false,
+    timeLeft:   settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
     goalTimer: 0,
     names:    { red: 'Red', blue: 'Blue' },
     sockets:  { red: null, blue: null },
@@ -158,11 +159,12 @@ function resetPlayers(room) {
 
 function broadcast(code, room) {
   io.to(code).emit('state', {
-    phase:     room.phase,
-    score:     room.score,
-    timeLeft:  room.timeLeft,
-    goalTimer: room.goalTimer,
-    names:     room.names,
+    phase:      room.phase,
+    score:      room.score,
+    goldenGoal: room.goldenGoal,
+    timeLeft:   room.timeLeft,
+    goalTimer:  room.goalTimer,
+    names:      room.names,
     ball:      { x: room.ball.x, y: room.ball.y, vx: room.ball.vx, vy: room.ball.vy, angle: room.ball.angle },
     players:   room.players.map(p => ({ id: p.id, team: p.team, x: p.x, y: p.y, vx: p.vx, vy: p.vy })),
   });
@@ -191,9 +193,14 @@ function tickRoom(code, room) {
     room.timeLeft -= dt;
     if (room.timeLeft <= 0) {
       room.timeLeft = 0;
-      room.phase = 'gameover';
-      broadcast(code, room);
-      return;
+      if (room.score.red === room.score.blue) {
+        room.goldenGoal = true;
+        room.timeLeft   = Infinity;
+      } else {
+        room.phase = 'gameover';
+        broadcast(code, room);
+        return;
+      }
     }
   }
 
@@ -226,12 +233,16 @@ function tickRoom(code, room) {
 
 function triggerGoal(code, room, team) {
   room.score[team]++;
-  const limit = room.settings.scoreLimit;
-  if (limit > 0 && room.score[team] >= limit) {
+  if (room.goldenGoal) {
     room.phase = 'gameover';
   } else {
-    room.phase     = 'goal';
-    room.goalTimer = GOAL_PAUSE_MS;
+    const limit = room.settings.scoreLimit;
+    if (limit > 0 && room.score[team] >= limit) {
+      room.phase = 'gameover';
+    } else {
+      room.phase     = 'goal';
+      room.goalTimer = GOAL_PAUSE_MS;
+    }
   }
   broadcast(code, room);
 }
