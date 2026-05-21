@@ -245,6 +245,8 @@ function tickRoom(code, room) {
 
 function triggerGoal(code, room, team) {
   room.score[team]++;
+  io.to(code).emit('goal', { team, score: room.score, names: room.names, goldenGoal: room.goldenGoal });
+
   if (room.goldenGoal) {
     room.phase = 'gameover';
   } else {
@@ -252,8 +254,9 @@ function triggerGoal(code, room, team) {
     if (limit > 0 && room.score[team] >= limit) {
       room.phase = 'gameover';
     } else {
-      room.phase     = 'goal';
-      room.goalTimer = GOAL_PAUSE_MS;
+      room.kickoffPending = true;
+      resetBall(room);
+      resetPlayers(room);
     }
   }
   broadcast(code, room);

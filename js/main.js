@@ -189,15 +189,6 @@ function gameLoop(timestamp) {
       updateTimer(dt);
       updatePhysics();
     }
-  } else if (state.phase === 'goal') {
-    state.goalTimer -= dt * 1000;
-    if (state.goalTimer <= 0) {
-      state.phase          = 'playing';
-      state.kickoffPending = true;
-      resetBall();
-      resetPlayers();
-      hideOverlay();
-    }
   } else if (state.phase === 'paused') {
     // reset delta so resuming doesn't cause a time jump
     state.lastTime = timestamp;

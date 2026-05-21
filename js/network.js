@@ -51,9 +51,11 @@ function netConnect() {
     state.goldenGoal     = s.goldenGoal;
     state.kickoffPending = s.kickoffPending;
     state.timeLeft       = s.timeLeft;
-    state.goalTimer  = s.goalTimer;
+    state.goalTimer      = s.goalTimer;
     if (s.names) state.names = s.names;
-    if (!wasGolden && s.goldenGoal) showGoldenGoalNotice();
+    if (!wasGolden && s.goldenGoal) {
+      addSystemMessage('⚡ GOLDEN GOAL — Next goal wins!');
+    }
 
     state.ball.x     = s.ball.x;
     state.ball.y     = s.ball.y;
@@ -82,6 +84,12 @@ function netConnect() {
     } else if (s.phase === 'playing') {
       hideOverlay();
     }
+  });
+
+  socket.on('goal', ({ team, score, names, goldenGoal }) => {
+    const name = names[team] || team.toUpperCase();
+    addSystemMessage(`⚽ ${name} scored! ${score.red} — ${score.blue}`);
+    if (goldenGoal) addSystemMessage('⚡ GOLDEN GOAL — Next goal wins!');
   });
 
   socket.on('player-left', ({ team }) => {

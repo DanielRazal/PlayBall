@@ -116,6 +116,9 @@ function triggerGoal(team) {
   state.lastGoalTeam = team;
   updateHUD();
 
+  const name = state.names[team] || team.toUpperCase();
+  addSystemMessage(`⚽ ${name} scored! ${state.score.red} — ${state.score.blue}`);
+
   if (state.goldenGoal) {
     state.phase = 'gameover';
     showGameOver();
@@ -129,9 +132,9 @@ function triggerGoal(team) {
     return;
   }
 
-  state.phase = 'goal';
-  state.goalTimer = GOAL_PAUSE_MS;
-  showGoalOverlay(team);
+  state.kickoffPending = true;
+  resetBall();
+  resetPlayers();
 }
 
 // ─── Timer & HUD ─────────────────────────────────────────────────────────────
@@ -148,7 +151,7 @@ function updateTimer(dt) {
       state.goldenGoal = true;
       state.timeLeft = Infinity;
       elTimer().textContent = 'GG';
-      showGoldenGoalNotice();
+      addSystemMessage('⚡ GOLDEN GOAL — Next goal wins!');
     } else {
       endGame();
     }
@@ -184,14 +187,6 @@ function showMainMenu() {
   setOverlayMode('menu');
 }
 
-function showGoalOverlay(team) {
-  elOverlay().classList.remove('hidden');
-  const name = state.names[team] || team.toUpperCase();
-  elTitle().textContent = 'GOAL!';
-  elMsg().textContent   = `${name} scores!`;
-  addSystemMessage(`⚽ ${name} scored! ${state.score.red} — ${state.score.blue}`);
-  setOverlayMode('goal');
-}
 
 function showGameOver() {
   elOverlay().classList.remove('hidden');
@@ -218,15 +213,6 @@ function hideOverlay() {
   elOverlay().classList.add('hidden');
 }
 
-function showGoldenGoalNotice() {
-  elOverlay().classList.remove('hidden');
-  elTitle().textContent = 'GOLDEN GOAL!';
-  elMsg().textContent   = 'Next goal wins';
-  setOverlayMode('golden');
-  setTimeout(() => {
-    if (state.goldenGoal && state.phase === 'playing') hideOverlay();
-  }, 1000);
-}
 
 function endGame() {
   state.phase = 'gameover';
