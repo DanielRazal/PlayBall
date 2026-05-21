@@ -127,24 +127,42 @@ function applyPlayerInput(p) {
 // ─── AI ───────────────────────────────────────────────────────────────────────
 
 const AI_LEVELS = {
-  easy:   { frameSkip: 4, speedMult: 0.55, posRadius: 120, noise: 45 },
-  medium: { frameSkip: 2, speedMult: 0.82, posRadius: 90,  noise: 12 },
-  hard:   { frameSkip: 1, speedMult: 1.0,  posRadius: 70,  noise: 0  },
+  //                  frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset
+  easy:   { frameSkip: 6, speedMult: 0.55, posRadius: 140, noise: 50, predictFrames: 0,  aimOffset: 0  },
+  medium: { frameSkip: 3, speedMult: 0.80, posRadius: 100, noise: 18, predictFrames: 18, aimOffset: 35 },
+  hard:   { frameSkip: 1, speedMult: 1.00, posRadius: 80,  noise: 0,  predictFrames: 40, aimOffset: 55 },
 };
+
+// Stable aim target — refreshed every ~30 frames so the AI commits to a corner
+let _aiAimY    = 0;
+let _aiAimTimer = 30; // start at 30 so first call triggers immediate refresh
 
 function applyAIInput(p) {
   const cfg = AI_LEVELS[state.settings.aiDifficulty] || AI_LEVELS.medium;
+  const b   = state.ball;
+  const k   = p.keys;
+
+  // Refresh aim target (which corner of the opponent's goal to aim for)
+  if (++_aiAimTimer >= 30) {
+    _aiAimTimer = 0;
+    _aiAimY = FIELD.centerY + (Math.random() > 0.5 ? 1 : -1) * cfg.aimOffset;
+  }
 
   state.aiFrameSkip = (state.aiFrameSkip + 1) % cfg.frameSkip;
-  if (state.aiFrameSkip !== 0) return;
+  if (state.aiFrameSkip !== 0) {
+    // On skip frames keep current movement keys; only refresh kick
+    k.kick = Math.hypot(b.x - p.x, b.y - p.y) < KICK_RANGE;
+    return;
+  }
 
-  const b = state.ball;
-  const k = p.keys;
   k.up = k.down = k.left = k.right = false;
 
-  const ballDist = Math.hypot(b.x - p.x, b.y - p.y);
+  // Predict ball position (intercept rather than chase)
+  const predBallX = Math.max(FIELD.left  + BALL_R, Math.min(FIELD.right  - BALL_R, b.x + b.vx * cfg.predictFrames));
+  const predBallY = Math.max(FIELD.top   + BALL_R, Math.min(FIELD.bottom - BALL_R, b.y + b.vy * cfg.predictFrames));
 
-  let targetX, targetY;
+  const ballDist = Math.hypot(b.x - p.x, b.y - p.y);
+  let   targetX, targetY;
 
   const dangerZone = p.team === 'blue'
     ? b.x > FIELD.right - 170
@@ -152,25 +170,30 @@ function applyAIInput(p) {
 
   if (ballDist < cfg.posRadius) {
     if (dangerZone) {
-      // ball near own goal — clear sideways rather than shooting into own net
+      // Clear ball sideways away from own goal
       const clearX = p.team === 'blue' ? -1 : 1;
       const clearY = b.y > FIELD.centerY ? -1 : 1;
       targetX = b.x + clearX * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
     } else {
-      // approach ball from behind, aiming at opponent's goal
+      // Position behind ball to shoot toward goal corner
       const goalX  = p.team === 'blue' ? FIELD.left : FIELD.right;
-      const btgX   = goalX - b.x;
-      const btgY   = FIELD.centerY - b.y;
+      const btgX   = goalX - predBallX;
+      const btgY   = _aiAimY - predBallY;
       const btgLen = Math.hypot(btgX, btgY) || 1;
       const approach = BALL_R + PLAYER_R + 6;
-      targetX = b.x - (btgX / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
-      targetY = b.y - (btgY / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
+      targetX = predBallX - (btgX / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
+      targetY = predBallY - (btgY / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
     }
   } else {
-    targetX = b.x + (Math.random() - 0.5) * cfg.noise;
-    targetY = b.y + (Math.random() - 0.5) * cfg.noise;
+    // Move toward predicted ball position
+    targetX = predBallX + (Math.random() - 0.5) * cfg.noise;
+    targetY = predBallY + (Math.random() - 0.5) * cfg.noise;
   }
+
+  // Keep target inside field so AI doesn't get stuck on walls
+  targetX = Math.max(FIELD.left + PLAYER_R, Math.min(FIELD.right  - PLAYER_R, targetX));
+  targetY = Math.max(FIELD.top  + PLAYER_R, Math.min(FIELD.bottom - PLAYER_R, targetY));
 
   const dx        = targetX - p.x;
   const dy        = targetY - p.y;
@@ -181,9 +204,19 @@ function applyAIInput(p) {
   k.down  = dy >  threshold;
   k.up    = dy < -threshold;
 
-  if (cfg.speedMult < 1.0 && Math.random() > cfg.speedMult) {
-    k.up = k.down = k.left = k.right = false;
+  // Kick logic scaled to difficulty
+  if (ballDist < KICK_RANGE) {
+    const kickDirX = b.x - p.x;
+    const ownGoalX = p.team === 'blue' ? FIELD.right : FIELD.left;
+    const safeKick = (ownGoalX - b.x) * kickDirX < 0; // kick dir points away from own goal
+    if (cfg.predictFrames === 0) {
+      k.kick = true;                                    // easy: always kick
+    } else if (cfg.predictFrames <= 20) {
+      k.kick = safeKick || Math.random() > 0.75;       // medium: mostly safe, 25% random kick
+    } else {
+      k.kick = safeKick;                                // hard: only kick when well-positioned
+    }
+  } else {
+    k.kick = false;
   }
-
-  k.kick = ballDist < KICK_RANGE;
 }
