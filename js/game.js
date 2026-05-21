@@ -76,6 +76,17 @@ function updatePhysics() {
     if (state.kickoffPending && p.team !== state.kickoffTeam) {
       if (p.team === 'blue' && p.x - p.radius < FIELD.centerX) { p.x = FIELD.centerX + p.radius; if (p.vx < 0) p.vx = 0; }
       if (p.team === 'red'  && p.x + p.radius > FIELD.centerX) { p.x = FIELD.centerX - p.radius; if (p.vx > 0) p.vx = 0; }
+      const cdx = p.x - FIELD.centerX, cdy = p.y - FIELD.centerY;
+      const cdist = Math.hypot(cdx, cdy);
+      const minDist = 58 + p.radius;
+      if (cdist < minDist) {
+        const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
+        const ny = cdist > 0.001 ? cdy / cdist : 0;
+        p.x = FIELD.centerX + nx * minDist;
+        p.y = FIELD.centerY + ny * minDist;
+        const vel = p.vx * nx + p.vy * ny;
+        if (vel < 0) { p.vx -= vel * nx; p.vy -= vel * ny; }
+      }
     }
   }
 
