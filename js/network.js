@@ -13,7 +13,7 @@ let lastSentKeys = null;
 
 const SERVER_URL = window.location.hostname === 'localhost'
   ? window.location.origin                      // local dev
-  : 'https://YOUR-APP-NAME.onrender.com';       // ← replace with your Render URL
+  : 'https://playball-9414.onrender.com';
 
 function netConnect() {
   if (socket && socket.connected) return;
