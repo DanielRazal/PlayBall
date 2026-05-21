@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlayBall</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="container">
+    <div id="hud">
+      <span id="score-red">0</span>
+      <span id="team-red">RED</span>
+      <span id="timer">3:00</span>
+      <span id="team-blue">BLUE</span>
+      <span id="score-blue">0</span>
+    </div>
+    <div id="canvas-wrap">
+      <canvas id="gameCanvas" width="800" height="500"></canvas>
+      <div id="overlay">
+        <div id="overlay-box">
+          <h1 id="overlay-title">PLAYBALL</h1>
+          <p id="overlay-msg">Choose game mode</p>
+          <div id="settings-row">
+            <div class="setting-group">
+              <label for="setting-time">Time Limit</label>
+              <div class="setting-input-wrap">
+                <button class="setting-btn" data-target="setting-time" data-delta="-1">−</button>
+                <span id="setting-time-display">3:00</span>
+                <input id="setting-time" type="hidden" value="3">
+                <button class="setting-btn" data-target="setting-time" data-delta="1">+</button>
+              </div>
+              <span class="setting-sub">minutes (0 = unlimited)</span>
+            </div>
+            <div class="setting-sep"></div>
+            <div class="setting-group">
+              <label for="setting-goals">Score Limit</label>
+              <div class="setting-input-wrap">
+                <button class="setting-btn" data-target="setting-goals" data-delta="-1">−</button>
+                <span id="setting-goals-display">3</span>
+                <input id="setting-goals" type="hidden" value="3">
+                <button class="setting-btn" data-target="setting-goals" data-delta="1">+</button>
+              </div>
+              <span class="setting-sub">goals (0 = unlimited)</span>
+            </div>
+          </div>
+          <div id="name-row">
+            <div class="name-group">
+              <label for="name-red">Red Player Name</label>
+              <input id="name-red" type="text" maxlength="12" placeholder="Red" spellcheck="false">
+            </div>
+            <div class="name-group">
+              <label for="name-blue">Blue Player Name</label>
+              <input id="name-blue" type="text" maxlength="12" placeholder="Blue" spellcheck="false">
+            </div>
+          </div>
+          <div id="dropdowns-row">
+            <div class="dropdown-group">
+              <label>Stadium</label>
+              <select id="sel-theme">
+                <option value="default">🟢 Default</option>
+                <option value="arsenal" selected>🔴 Arsenal</option>
+                <option value="barcelona">🔵 Barcelona</option>
+                <option value="realmadrid">⭐ Real Madrid</option>
+                <option value="liverpool">🔴 Liverpool</option>
+                <option value="mancity">🩵 Man City</option>
+                <option value="chelsea">🔵 Chelsea</option>
+                <option value="bayernmunich">🔴 Bayern Munich</option>
+                <option value="manutd">🔴 Man United</option>
+                <option value="psg">🔵 PSG</option>
+                <option value="dortmund">🟡 Dortmund</option>
+                <option value="acmilan">🔴 AC Milan</option>
+                <option value="inter">🔵 Inter Milan</option>
+              </select>
+            </div>
+            <div class="dropdown-group">
+              <label>Field Size</label>
+              <select id="sel-size">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+            <div class="dropdown-group">
+              <label>AI Level</label>
+              <select id="sel-diff">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="btn-row">
+            <button id="btn-2p">2 Players</button>
+            <button id="btn-ai">vs AI</button>
+            <button id="btn-online">Online</button>
+          </div>
+          <div id="online-panel" style="display:none">
+            <div id="net-error"></div>
+            <div id="online-cols">
+              <div class="online-col">
+                <span class="online-col-label">New game</span>
+                <button id="btn-create-room">Create Room</button>
+              </div>
+              <div class="online-divider"></div>
+              <div class="online-col">
+                <span class="online-col-label">Have a code?</span>
+                <div class="online-join-inputs">
+                  <input id="net-join-code" type="text" maxlength="4" placeholder="XXXX" spellcheck="false" autocomplete="off">
+                  <button id="btn-join-room">Join</button>
+                </div>
+              </div>
+            </div>
+            <div id="net-waiting" style="display:none">
+              Waiting for opponent… share this code:
+              <strong id="net-code-display"></strong>
+            </div>
+          </div>
+          <div id="pause-btn-row" style="display:none">
+            <button id="btn-resume">Resume</button>
+            <button id="btn-restart">Restart</button>
+            <button id="btn-menu">Main Menu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="chat-wrap">
+      <div id="chat-log"></div>
+      <div id="chat-input-row">
+        <button id="chat-player-btn" class="chat-player red">RED</button>
+        <input id="chat-input" type="text" maxlength="80" placeholder="Press Enter to chat..." autocomplete="off" spellcheck="false">
+        <button id="chat-send">Send</button>
+      </div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/constants.js"></script>
+  <script src="js/themes.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
