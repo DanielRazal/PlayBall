@@ -100,6 +100,10 @@ function netConnect() {
     onlineMode = false;
   });
 
+  socket.on('chat', ({ team, name, text }) => {
+    addChatMessage(team, name, text);
+  });
+
   socket.on('disconnect', () => {
     if (onlineMode) {
       addSystemMessage('⚠ Disconnected from server.');
@@ -108,6 +112,11 @@ function netConnect() {
       onlineMode = false;
     }
   });
+}
+
+function netSendChat(team, name, text) {
+  if (!socket || !onlineMode) return;
+  socket.emit('chat', { team, name, text });
 }
 
 function netSendInput(keys) {

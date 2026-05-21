@@ -125,10 +125,6 @@ function setupChat() {
     playerBtn.className = 'chat-player ' + activeSide;
   }
 
-  function escapeHtml(s) {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
   function sendMessage() {
     const text = input.value.trim();
     input.value = '';
@@ -140,19 +136,8 @@ function setupChat() {
       ? (state.names.red  || 'Red')
       : (state.names.blue || 'Blue');
 
-    const log = document.getElementById('chat-log');
-    const msg = document.createElement('div');
-    msg.className = 'chat-msg ' + activeSide;
-
-    const now  = new Date();
-    const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-    msg.innerHTML =
-      `<span class="chat-time">${time}</span>` +
-      `<span class="chat-name">${escapeHtml(name)}:</span>` +
-      `<span class="chat-text">${escapeHtml(text)}</span>`;
-    log.appendChild(msg);
-    while (log.children.length > 80) log.removeChild(log.firstChild);
-    log.scrollTop = log.scrollHeight;
+    addChatMessage(activeSide, name, text);
+    if (isOnline()) netSendChat(activeSide, name, text);
   }
 
   sendBtn.addEventListener('click', sendMessage);
@@ -162,6 +147,24 @@ function setupChat() {
     if (e.code === 'Enter')  { e.preventDefault(); sendMessage(); }
     if (e.code === 'Escape') { e.preventDefault(); input.value = ''; input.blur(); }
   });
+}
+
+function addChatMessage(team, name, text) {
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  const log = document.getElementById('chat-log');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg ' + team;
+  const now  = new Date();
+  const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  msg.innerHTML =
+    `<span class="chat-time">${time}</span>` +
+    `<span class="chat-name">${escapeHtml(name)}:</span>` +
+    `<span class="chat-text">${escapeHtml(text)}</span>`;
+  log.appendChild(msg);
+  while (log.children.length > 80) log.removeChild(log.firstChild);
+  log.scrollTop = log.scrollHeight;
 }
 
 function addSystemMessage(text) {

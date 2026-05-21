@@ -353,6 +353,11 @@ io.on('connection', (socket) => {
     if (p) p.keys = keys;
   });
 
+  socket.on('chat', ({ team, name, text }) => {
+    if (!myCode) return;
+    socket.to(myCode).emit('chat', { team, name, text });
+  });
+
   socket.on('disconnect', () => {
     if (!myCode) return;
     io.to(myCode).emit('player-left', { team: myTeam });

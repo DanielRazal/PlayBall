@@ -230,6 +230,7 @@ function showPause() {
   elOverlay().classList.remove('hidden');
   elTitle().textContent = 'PAUSE';
   elMsg().textContent   = '';
+  document.getElementById('btn-menu').style.display = isOnline() ? '' : 'none';
   setOverlayMode('pause');
 }
 
