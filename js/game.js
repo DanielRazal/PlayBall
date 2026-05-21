@@ -220,7 +220,7 @@ function showGameOver() {
   if (red > blue)      result = `${rName} wins!`;
   else if (blue > red) result = `${bName} wins!`;
   else                 result = 'Draw!';
-  document.getElementById('overlay-score').textContent = `${red} — ${blue}`;
+  document.getElementById('overlay-score').textContent = `${red} - ${blue}`;
   elTitle().textContent = result.toUpperCase();
   elMsg().textContent   = '';
   setOverlayMode('gameover');
