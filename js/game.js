@@ -74,8 +74,8 @@ function updatePhysics() {
     clampPlayerToField(p);
 
     if (state.kickoffPending && p.team !== state.kickoffTeam) {
-      if (p.team === 'blue' && p.x < FIELD.centerX) { p.x = FIELD.centerX; if (p.vx < 0) p.vx = 0; }
-      if (p.team === 'red'  && p.x > FIELD.centerX) { p.x = FIELD.centerX; if (p.vx > 0) p.vx = 0; }
+      if (p.team === 'blue' && p.x - p.radius < FIELD.centerX) { p.x = FIELD.centerX + p.radius; if (p.vx < 0) p.vx = 0; }
+      if (p.team === 'red'  && p.x + p.radius > FIELD.centerX) { p.x = FIELD.centerX - p.radius; if (p.vx > 0) p.vx = 0; }
     }
   }
 
@@ -90,8 +90,8 @@ function updatePhysics() {
 
   applyKick(p0);
   applyKick(p1);
-  resolveCircleCollision(p0, b);
-  resolveCircleCollision(p1, b);
+  if (!state.kickoffPending || p0.team === state.kickoffTeam) resolveCircleCollision(p0, b);
+  if (!state.kickoffPending || p1.team === state.kickoffTeam) resolveCircleCollision(p1, b);
   resolveCircleCollision(p0, p1);
 
   if (state.kickoffPending) {

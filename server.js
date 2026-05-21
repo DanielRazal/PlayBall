@@ -219,8 +219,8 @@ function tickRoom(code, room) {
     clampPlayer(p, room.field);
     if (room.kickoffPending && p.team !== room.kickoffTeam) {
       const cx = (room.field.left + room.field.right) / 2;
-      if (p.team === 'blue' && p.x < cx) { p.x = cx; if (p.vx < 0) p.vx = 0; }
-      if (p.team === 'red'  && p.x > cx) { p.x = cx; if (p.vx > 0) p.vx = 0; }
+      if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
+      if (p.team === 'red'  && p.x + p.radius > cx) { p.x = cx - p.radius; if (p.vx > 0) p.vx = 0; }
     }
   }
 
@@ -232,7 +232,9 @@ function tickRoom(code, room) {
 
   resolveBallWalls(room);
   applyKick(p0, b, now, room); applyKick(p1, b, now, room);
-  resolveCollision(p0, b); resolveCollision(p1, b); resolveCollision(p0, p1);
+  if (!room.kickoffPending || p0.team === room.kickoffTeam) resolveCollision(p0, b);
+  if (!room.kickoffPending || p1.team === room.kickoffTeam) resolveCollision(p1, b);
+  resolveCollision(p0, p1);
 
   if (room.kickoffPending) {
     for (const p of room.players) {
