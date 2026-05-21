@@ -113,6 +113,16 @@ body {
   gap: 16px;
 }
 
+#overlay-score {
+  display: none;
+  font-size: 90px;
+  font-weight: 900;
+  letter-spacing: 14px;
+  color: #ffffff;
+  text-shadow: 0 0 50px rgba(255, 210, 50, 0.85), 0 4px 28px rgba(0, 0, 0, 0.8);
+  line-height: 1;
+}
+
 #overlay-title {
   font-size: 52px;
   font-weight: 900;

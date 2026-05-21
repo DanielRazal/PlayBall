@@ -199,6 +199,7 @@ function setOverlayMode(mode) {
   document.getElementById('name-row').style.display      = menuOnly;
   document.getElementById('settings-row').style.display  = menuOnly;
   document.getElementById('dropdowns-row').style.display = menuOnly;
+  document.getElementById('overlay-score').style.display = mode === 'gameover' ? 'block' : 'none';
   if (mode !== 'menu') document.getElementById('online-panel').style.display = 'none';
 }
 
@@ -219,8 +220,9 @@ function showGameOver() {
   if (red > blue)      result = `${rName} wins!`;
   else if (blue > red) result = `${bName} wins!`;
   else                 result = 'Draw!';
-  elTitle().textContent = result;
-  elMsg().textContent   = `${red} — ${blue}`;
+  document.getElementById('overlay-score').textContent = `${red} — ${blue}`;
+  elTitle().textContent = result.toUpperCase();
+  elMsg().textContent   = '';
   setOverlayMode('gameover');
 }
 
