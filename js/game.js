@@ -215,7 +215,7 @@ function showGoldenGoalNotice() {
   setOverlayMode('golden');
   setTimeout(() => {
     if (state.goldenGoal && state.phase === 'playing') hideOverlay();
-  }, 2500);
+  }, 1000);
 }
 
 function endGame() {
