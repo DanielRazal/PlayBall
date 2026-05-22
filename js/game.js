@@ -94,6 +94,10 @@ function startGame(mode) {
   state.players[1].team = ai;
   state.players[1].isAI = (mode === 'ai');
 
+  const num = Math.max(1, Math.min(1000, parseInt(document.getElementById('player-number').value) || 7));
+  state.playerNumbers[human] = num;
+  state.playerNumbers[ai]    = mode === 'ai' ? 1 : 7;
+
   state.mode           = mode;
   state.score          = { red: 0, blue: 0 };
   state.timeLeft       = state.settings.timeMins > 0 ? state.settings.timeMins * 60 : Infinity;
@@ -278,7 +282,7 @@ function setOverlayMode(mode) {
   elPauseBtnRow().style.display = mode === 'pause' || mode === 'gameover' ? 'flex' : 'none';
   document.getElementById('btn-resume').style.display = mode === 'gameover' ? 'none' : '';
   const menuOnly = mode === 'menu' ? 'flex' : 'none';
-  document.getElementById('name-row').style.display      = menuOnly;
+  document.getElementById('name-row').style.display      = (mode === 'menu' || mode === 'pause' || mode === 'gameover') ? 'flex' : 'none';
   document.getElementById('settings-row').style.display  = menuOnly;
   document.getElementById('dropdowns-row').style.display = menuOnly;
   document.getElementById('overlay-score').style.display = mode === 'gameover' ? 'block' : 'none';

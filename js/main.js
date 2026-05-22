@@ -13,6 +13,7 @@ function setupInput() {
   document.addEventListener('keydown', (e) => {
     if (document.activeElement === document.getElementById('chat-input')) return;
     if (document.activeElement === document.getElementById('name-red')) return;
+    if (document.activeElement === document.getElementById('player-number')) return;
     if (PREVENT.has(e.code)) e.preventDefault();
     if (e.code === 'Escape') {
       if (state.phase === 'playing') pauseGame();
@@ -69,16 +70,26 @@ function setupInput() {
 
   document.getElementById('btn-create-room').addEventListener('click', () => {
     const name = document.getElementById('name-red').value || 'Player';
+    const num  = Math.max(1, Math.min(1000, parseInt(document.getElementById('player-number').value) || 7));
     state.settings.humanTeam = 'red';
-    netCreateRoom(state.settings, name);
+    netCreateRoom(state.settings, name, num);
   });
 
   document.getElementById('btn-join-room').addEventListener('click', () => {
     const code = document.getElementById('net-join-code').value.trim();
     const name = document.getElementById('name-red').value || 'Player';
+    const num  = Math.max(1, Math.min(1000, parseInt(document.getElementById('player-number').value) || 7));
     if (!code) return;
     state.settings.humanTeam = 'blue';
-    netJoinRoom(code, name);
+    netJoinRoom(code, name, num);
+  });
+
+  document.getElementById('player-number').addEventListener('change', (e) => {
+    let val = parseInt(e.target.value);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > 1000) val = 1000;
+    e.target.value = val;
+    state.playerNumbers[state.settings.humanTeam] = val;
   });
 
   function updateSettingDisplay(inputId) {

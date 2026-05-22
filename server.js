@@ -69,7 +69,8 @@ function createRoom(settings) {
     timeLeft:       settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
     goalTimer: 0,
     lastTouchTeam: null,
-    names:    { red: 'Red', blue: 'Blue' },
+    names:         { red: 'Red', blue: 'Blue' },
+    playerNumbers: { red: 7,     blue: 7     },
     sockets:  { red: null, blue: null },
     ball: { x: cx, y: cy, vx: 0, vy: 0, radius: BALL_R, mass: BALL_M, angle: 0 },
     players: [
@@ -177,7 +178,8 @@ function broadcast(code, room) {
     kickoffPending: room.kickoffPending,
     timeLeft:       room.timeLeft,
     goalTimer:  room.goalTimer,
-    names:      room.names,
+    names:         room.names,
+    playerNumbers: room.playerNumbers,
     ball:      { x: room.ball.x, y: room.ball.y, vx: room.ball.vx, vy: room.ball.vy, angle: room.ball.angle },
     players:   room.players.map(p => ({ id: p.id, team: p.team, x: p.x, y: p.y, vx: p.vx, vy: p.vy })),
   });
@@ -340,13 +342,14 @@ io.on('connection', (socket) => {
   let myCode = null;
   let myTeam = null;
 
-  socket.on('create-room', ({ settings, name }) => {
+  socket.on('create-room', ({ settings, name, playerNumber }) => {
     let code;
     do { code = makeCode(); } while (rooms.has(code));
 
     const room = createRoom(settings);
-    room.sockets.red = socket.id;
-    room.names.red   = name || 'Red';
+    room.sockets.red      = socket.id;
+    room.names.red        = name || 'Red';
+    room.playerNumbers.red = Math.max(1, Math.min(1000, parseInt(playerNumber) || 7));
     rooms.set(code, room);
 
     myCode = code;
@@ -355,20 +358,21 @@ io.on('connection', (socket) => {
     socket.emit('room-created', { code, team: 'red' });
   });
 
-  socket.on('join-room', ({ code, name }) => {
+  socket.on('join-room', ({ code, name, playerNumber }) => {
     const room = rooms.get(code.toUpperCase());
     if (!room)              { socket.emit('join-error', 'Room not found');  return; }
     if (room.sockets.blue)  { socket.emit('join-error', 'Room is full');    return; }
     if (room.phase !== 'waiting') { socket.emit('join-error', 'Game already started'); return; }
 
-    room.sockets.blue = socket.id;
-    room.names.blue   = name || 'Blue';
+    room.sockets.blue       = socket.id;
+    room.names.blue         = name || 'Blue';
+    room.playerNumbers.blue = Math.max(1, Math.min(1000, parseInt(playerNumber) || 7));
     myCode = code.toUpperCase();
     myTeam = 'blue';
 
     socket.join(myCode);
     socket.emit('room-joined', { code: myCode, team: 'blue' });
-    io.to(myCode).emit('player-joined', { names: room.names });
+    io.to(myCode).emit('player-joined', { names: room.names, playerNumbers: room.playerNumbers });
 
     // Both players ready — start
     room.phase    = 'playing';

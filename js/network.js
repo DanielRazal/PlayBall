@@ -26,9 +26,10 @@ function netConnect() {
     document.getElementById('online-cols').style.display = 'none';
   });
 
-  socket.on('player-joined', ({ names }) => {
+  socket.on('player-joined', ({ names, playerNumbers }) => {
     state.names.red  = names.red;
     state.names.blue = names.blue;
+    if (playerNumbers) state.playerNumbers = playerNumbers;
     document.getElementById('net-waiting').style.display = 'none';
     startOnlineGame();
   });
@@ -54,6 +55,7 @@ function netConnect() {
     state.timeLeft       = s.timeLeft;
     state.goalTimer      = s.goalTimer;
     if (s.names) state.names = s.names;
+    if (s.playerNumbers) state.playerNumbers = s.playerNumbers;
     if (!wasGolden && s.goldenGoal) {
       showGoldenGoalNotif();
     }
@@ -136,14 +138,14 @@ function netSendInput(keys) {
   socket.emit('input', keys);
 }
 
-function netCreateRoom(settings, name) {
+function netCreateRoom(settings, name, playerNumber) {
   netConnect();
-  socket.emit('create-room', { settings, name });
+  socket.emit('create-room', { settings, name, playerNumber: playerNumber || 7 });
 }
 
-function netJoinRoom(code, name) {
+function netJoinRoom(code, name, playerNumber) {
   netConnect();
-  socket.emit('join-room', { code: code.trim().toUpperCase(), name });
+  socket.emit('join-room', { code: code.trim().toUpperCase(), name, playerNumber: playerNumber || 7 });
 }
 
 function startOnlineGame() {

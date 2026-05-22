@@ -213,6 +213,18 @@ function drawPlayer(p) {
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.fill();
 
+  // Jersey number inside circle
+  const numStr = String(state.playerNumbers[p.team] ?? '');
+  if (numStr) {
+    const fontSize = numStr.length <= 1 ? 12 : numStr.length === 2 ? 11 : numStr.length === 3 ? 9 : 7;
+    ctx.font = `bold ${fontSize}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillText(numStr, p.x, p.y);
+  }
+
+  // Name label below circle
   const name = state.names[p.team] || p.team;
   ctx.font = 'bold 11px Arial';
   ctx.textAlign = 'center';
