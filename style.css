@@ -236,17 +236,22 @@ body {
 #btn-confirm-name:active { transform: scale(0.96); }
 
 #name-display {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  color: #aaccff;
+  color: #ccdeff;
   cursor: pointer;
   letter-spacing: 1px;
-  transition: color 0.15s, text-shadow 0.15s;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  padding: 8px 20px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   margin-top: -4px;
 }
 #name-display:hover {
+  background: rgba(255,255,255,0.13);
   color: #ffffff;
-  text-shadow: 0 0 12px rgba(120, 180, 255, 0.7);
+  border-color: rgba(255,255,255,0.35);
 }
 
 #name-red::placeholder {

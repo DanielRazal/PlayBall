@@ -65,6 +65,7 @@ function setupInput() {
     document.getElementById('dropdowns-row').style.display = 'none';
     document.getElementById('online-panel').style.display  = 'none';
     elBtnRow().style.display = 'none';
+    document.getElementById('name-display').style.display = 'none';
     elMsg().textContent      = '';
     elTitle().textContent    = 'CHOOSE DIFFICULTY';
     updateDiffButtons();
