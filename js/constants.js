@@ -26,7 +26,7 @@ const FIELD_SIZES = {
   small:  { left: 130, right: 670, top: 90,  bottom: 410, goalH: 100, goalDeep: 28 },
   medium: { left: 42,  right: 758, top: 42,  bottom: 458, goalH: 130, goalDeep: 32 },
   large:  { left: 38,  right: 762, top: 8,   bottom: 492, goalH: 155, goalDeep: 32 },
-  xl:     { left: 10,  right: 790, top: 2,   bottom: 498, goalH: 175, goalDeep: 36 },
+  xl:     { left: 32,  right: 768, top: 2,   bottom: 498, goalH: 175, goalDeep: 30 },
 };
 
 // ─── Entity sizes & masses ───────────────────────────────────────────────────
