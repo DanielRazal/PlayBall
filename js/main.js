@@ -70,26 +70,24 @@ function setupInput() {
 
   document.getElementById('btn-create-room').addEventListener('click', () => {
     const name = document.getElementById('name-red').value || 'Player';
-    const num  = Math.max(1, Math.min(1000, parseInt(document.getElementById('player-number').value) || 7));
+    const tag  = (document.getElementById('player-number').value.trim() || '7').slice(0, 2);
     state.settings.humanTeam = 'red';
-    netCreateRoom(state.settings, name, num);
+    netCreateRoom(state.settings, name, tag);
   });
 
   document.getElementById('btn-join-room').addEventListener('click', () => {
     const code = document.getElementById('net-join-code').value.trim();
     const name = document.getElementById('name-red').value || 'Player';
-    const num  = Math.max(1, Math.min(1000, parseInt(document.getElementById('player-number').value) || 7));
+    const tag  = (document.getElementById('player-number').value.trim() || '7').slice(0, 2);
     if (!code) return;
     state.settings.humanTeam = 'blue';
-    netJoinRoom(code, name, num);
+    netJoinRoom(code, name, tag);
   });
 
-  document.getElementById('player-number').addEventListener('change', (e) => {
-    let val = parseInt(e.target.value);
-    if (isNaN(val) || val < 1) val = 1;
-    if (val > 1000) val = 1000;
-    e.target.value = val;
-    state.playerNumbers[state.settings.humanTeam] = val;
+  document.getElementById('player-number').addEventListener('input', (e) => {
+    const tag = e.target.value.slice(0, 2);
+    e.target.value = tag;
+    state.playerNumbers[state.settings.humanTeam] = tag || '7';
   });
 
   function updateSettingDisplay(inputId) {

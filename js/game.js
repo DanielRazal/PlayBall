@@ -94,9 +94,9 @@ function startGame(mode) {
   state.players[1].team = ai;
   state.players[1].isAI = (mode === 'ai');
 
-  const num = Math.max(1, Math.min(1000, parseInt(document.getElementById('player-number').value) || 7));
-  state.playerNumbers[human] = num;
-  state.playerNumbers[ai]    = mode === 'ai' ? 1 : 7;
+  const tag = (document.getElementById('player-number').value.trim() || '7').slice(0, 2);
+  state.playerNumbers[human] = tag;
+  state.playerNumbers[ai]    = mode === 'ai' ? '1' : '7';
 
   state.mode           = mode;
   state.score          = { red: 0, blue: 0 };

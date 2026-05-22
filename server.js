@@ -70,7 +70,7 @@ function createRoom(settings) {
     goalTimer: 0,
     lastTouchTeam: null,
     names:         { red: 'Red', blue: 'Blue' },
-    playerNumbers: { red: 7,     blue: 7     },
+    playerNumbers: { red: '7', blue: '7' },
     sockets:  { red: null, blue: null },
     ball: { x: cx, y: cy, vx: 0, vy: 0, radius: BALL_R, mass: BALL_M, angle: 0 },
     players: [
@@ -349,7 +349,7 @@ io.on('connection', (socket) => {
     const room = createRoom(settings);
     room.sockets.red      = socket.id;
     room.names.red        = name || 'Red';
-    room.playerNumbers.red = Math.max(1, Math.min(1000, parseInt(playerNumber) || 7));
+    room.playerNumbers.red = String(playerNumber || '7').slice(0, 2);
     rooms.set(code, room);
 
     myCode = code;
@@ -366,7 +366,7 @@ io.on('connection', (socket) => {
 
     room.sockets.blue       = socket.id;
     room.names.blue         = name || 'Blue';
-    room.playerNumbers.blue = Math.max(1, Math.min(1000, parseInt(playerNumber) || 7));
+    room.playerNumbers.blue = String(playerNumber || '7').slice(0, 2);
     myCode = code.toUpperCase();
     myTeam = 'blue';
 
