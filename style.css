@@ -104,6 +104,53 @@ body {
   display: none;
 }
 
+/* ── In-game notification ────────────────────────────────────────────────── */
+#game-notif {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  z-index: 20;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  opacity: 1;
+}
+#game-notif.game-notif-hidden {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.7);
+  pointer-events: none;
+}
+#game-notif-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 42px;
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+  background: rgba(10, 10, 30, 0.82);
+  border: 2px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+  min-width: 260px;
+  text-align: center;
+}
+#game-notif-icon {
+  font-size: 44px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+}
+#game-notif-text {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  white-space: nowrap;
+}
+#game-notif.notif-goal    #game-notif-inner { border-color: rgba(80,255,120,0.35); box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 32px rgba(60,220,90,0.25); }
+#game-notif.notif-golden  #game-notif-inner { border-color: rgba(255,220,50,0.5);  box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 40px rgba(255,200,0,0.35); }
+#game-notif.notif-warn    #game-notif-inner { border-color: rgba(255,120,60,0.45); box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 32px rgba(255,100,40,0.25); }
+
 #overlay-box {
   text-align: center;
   color: white;

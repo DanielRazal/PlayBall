@@ -55,7 +55,7 @@ function netConnect() {
     state.goalTimer      = s.goalTimer;
     if (s.names) state.names = s.names;
     if (!wasGolden && s.goldenGoal) {
-      addSystemMessage('⚡ GOLDEN GOAL — Next goal wins!');
+      showGoldenGoalNotif();
     }
 
     state.ball.x     = s.ball.x;
@@ -89,12 +89,12 @@ function netConnect() {
 
   socket.on('goal', ({ team, score, names, goldenGoal }) => {
     const name = names[team] || team.toUpperCase();
-    addSystemMessage(`⚽ ${name} scored! ${score.red} — ${score.blue}`);
-    if (goldenGoal) addSystemMessage('⚡ GOLDEN GOAL — Next goal wins!');
+    showGoalNotif(name, score.red, score.blue);
+    if (goldenGoal) setTimeout(() => showGoldenGoalNotif(), 2800);
   });
 
   socket.on('player-left', ({ team }) => {
-    addSystemMessage(`⚠ ${team.toUpperCase()} player disconnected.`);
+    showWarnNotif(`${team.toUpperCase()} player disconnected.`);
     state.phase = 'gameover';
     showGameOver();
     onlineMode = false;
@@ -106,7 +106,7 @@ function netConnect() {
 
   socket.on('disconnect', () => {
     if (onlineMode) {
-      addSystemMessage('⚠ Disconnected from server.');
+      showWarnNotif('Disconnected from server.');
       state.phase = 'gameover';
       showGameOver();
       onlineMode = false;

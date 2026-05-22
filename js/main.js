@@ -104,10 +104,13 @@ function setupInput() {
 // ─── Chat setup ───────────────────────────────────────────────────────────────
 
 function syncChatMode() {
+  const chatWrap  = document.getElementById('chat-wrap');
   const input     = document.getElementById('chat-input');
   const sendBtn   = document.getElementById('chat-send');
   const playerBtn = document.getElementById('chat-player-btn');
   const online    = isOnline();
+
+  chatWrap.style.display = online ? '' : 'none';
 
   input.disabled    = !online;
   sendBtn.disabled  = !online;
@@ -199,8 +202,10 @@ function gameLoop(timestamp) {
       updateTimer(dt);
       updatePhysics();
     }
+  } else if (state.phase === 'notif') {
+    // physics frozen during notification; keep lastTime ticking so no time jump on resume
+    state.lastTime = timestamp;
   } else if (state.phase === 'paused') {
-    // reset delta so resuming doesn't cause a time jump
     state.lastTime = timestamp;
   }
 

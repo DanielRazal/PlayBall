@@ -1,5 +1,52 @@
 'use strict';
 
+// ─── In-game notifications ────────────────────────────────────────────────────
+
+let _notifTimer = null;
+
+function showNotification(icon, text, type, durationMs) {
+  const el     = document.getElementById('game-notif');
+  const elIcon = document.getElementById('game-notif-icon');
+  const elText = document.getElementById('game-notif-text');
+
+  if (_notifTimer) { clearTimeout(_notifTimer); _notifTimer = null; }
+
+  elIcon.textContent = icon;
+  elText.textContent = text;
+  el.className = 'notif-' + type;
+  void el.offsetWidth; // force reflow so transition fires
+  _notifTimer = setTimeout(() => {
+    el.classList.add('game-notif-hidden');
+    _notifTimer = null;
+    if (state.phase === 'notif') state.phase = 'playing';
+  }, durationMs);
+}
+
+function hideNotification() {
+  const el = document.getElementById('game-notif');
+  el.classList.add('game-notif-hidden');
+  if (_notifTimer) { clearTimeout(_notifTimer); _notifTimer = null; }
+}
+
+// Replaces addSystemMessage for in-game events
+function showGoalNotif(scorerName, red, blue) {
+  state.phase = 'notif';
+  showNotification('⚽', `${scorerName} scored!  ${red} — ${blue}`, 'goal', 2500);
+}
+
+function showGoldenGoalNotif() {
+  showNotification('⚡', 'GOLDEN GOAL — Next goal wins!', 'golden', 3000);
+}
+
+function showWarnNotif(text) {
+  showNotification('⚠', text, 'warn', 3000);
+}
+
+function showGoalOverlay(team) {
+  const name = state.names[team] || team.toUpperCase();
+  showGoalNotif(name, state.score.red, state.score.blue);
+}
+
 // ─── Reset helpers ────────────────────────────────────────────────────────────
 
 function resetBall() {
@@ -140,7 +187,6 @@ function triggerGoal(team) {
   updateHUD();
 
   const name = state.names[team] || team.toUpperCase();
-  addSystemMessage(`⚽ ${name} scored! ${state.score.red} — ${state.score.blue}`);
 
   if (state.goldenGoal) {
     state.phase = 'gameover';
@@ -154,6 +200,8 @@ function triggerGoal(team) {
     showGameOver();
     return;
   }
+
+  showGoalNotif(name, state.score.red, state.score.blue);
 
   state.kickoffTeam    = team === 'red' ? 'blue' : 'red';
   state.kickoffPending = true;
@@ -175,7 +223,7 @@ function updateTimer(dt) {
       state.goldenGoal = true;
       state.timeLeft = Infinity;
       elTimer().textContent = 'GG';
-      addSystemMessage('⚡ GOLDEN GOAL — Next goal wins!');
+      showGoldenGoalNotif();
     } else {
       endGame();
     }
