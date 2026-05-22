@@ -241,18 +241,9 @@ body {
   color: #ccdeff;
   cursor: pointer;
   letter-spacing: 1px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 20px;
-  padding: 8px 20px;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-  margin-top: -4px;
+  transition: color 0.15s;
 }
-#name-display:hover {
-  background: rgba(255,255,255,0.13);
-  color: #ffffff;
-  border-color: rgba(255,255,255,0.35);
-}
+#name-display:hover { color: #ffffff; }
 
 #name-red::placeholder {
   color: #aabbff;
