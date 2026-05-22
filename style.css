@@ -236,14 +236,14 @@ body {
 #btn-confirm-name:active { transform: scale(0.96); }
 
 #name-display {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #ccdeff;
   cursor: pointer;
   letter-spacing: 1px;
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 8px;
+  border-radius: 20px;
   padding: 8px 20px;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   margin-top: -4px;
