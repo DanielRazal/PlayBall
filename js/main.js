@@ -149,6 +149,25 @@ function setupInput() {
     if (val > 500) val = 500;
     state.settings.extrapolation = val;
   });
+
+  document.getElementById('name-red').addEventListener('input', (e) => {
+    localStorage.setItem('playball_nickname', e.target.value);
+  });
+
+  function confirmName() {
+    localStorage.setItem('playball_nickname', document.getElementById('name-red').value);
+    showMainMenu();
+  }
+
+  document.getElementById('btn-confirm-name').addEventListener('click', confirmName);
+
+  document.getElementById('name-red').addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.code === 'Enter' && document.getElementById('btn-confirm-name').style.display !== 'none') {
+      e.preventDefault();
+      confirmName();
+    }
+  });
 }
 
 // ─── Chat setup ───────────────────────────────────────────────────────────────
@@ -298,6 +317,8 @@ window.addEventListener('load', () => {
   canvas = document.getElementById('gameCanvas');
   ctx    = canvas.getContext('2d');
   preloadLogos();
+  const _savedName = localStorage.getItem('playball_nickname');
+  if (_savedName !== null) document.getElementById('name-red').value = _savedName;
   setupInput();
   setupChat();
   showMainMenu();

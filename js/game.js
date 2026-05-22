@@ -279,24 +279,33 @@ function updateHUD() {
 const elPauseBtnRow = () => document.getElementById('pause-btn-row');
 
 function setOverlayMode(mode) {
+  const isNameEntry = mode === 'nameentry';
   elBtnRow().style.display      = mode === 'menu' ? 'flex' : 'none';
   elPauseBtnRow().style.display = mode === 'pause' || mode === 'gameover' ? 'flex' : 'none';
   document.getElementById('btn-resume').style.display = mode === 'gameover' ? 'none' : '';
   const menuOnly = mode === 'menu' ? 'flex' : 'none';
-  document.getElementById('name-row').style.display      = (mode === 'menu' || mode === 'pause' || mode === 'gameover') ? 'flex' : 'none';
+  document.getElementById('name-row').style.display      = (mode === 'menu' || mode === 'pause' || mode === 'gameover' || isNameEntry) ? 'flex' : 'none';
   document.getElementById('settings-row').style.display  = menuOnly;
   document.getElementById('dropdowns-row').style.display = menuOnly;
   document.getElementById('overlay-score').style.display = mode === 'gameover' ? 'block' : 'none';
   if (mode !== 'menu') document.getElementById('online-panel').style.display = 'none';
   const showAI = state.mode === 'ai' && mode === 'gameover';
   document.getElementById('ai-row').style.display = showAI ? 'flex' : 'none';
+  document.getElementById('btn-confirm-name').style.display = isNameEntry ? '' : 'none';
+  document.getElementById('tag-group').style.display = isNameEntry ? 'none' : '';
+  document.getElementById('overlay-box').classList.toggle('nameentry', isNameEntry);
 }
 
 function showMainMenu() {
   elOverlay().classList.remove('hidden');
   elTitle().textContent = 'PLAYBALL';
   elMsg().textContent   = '';
-  setOverlayMode('menu');
+  if (localStorage.getItem('playball_nickname') === null) {
+    setOverlayMode('nameentry');
+    setTimeout(() => document.getElementById('name-red').focus(), 50);
+  } else {
+    setOverlayMode('menu');
+  }
 }
 
 
