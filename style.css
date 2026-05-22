@@ -303,7 +303,7 @@ body {
 #name-row .name-group:first-child input:focus { border-color: rgba(255,80,80,0.7); }
 #name-row .name-group:last-child  input:focus { border-color: rgba(255,200,60,0.7); }
 
-.name-group-num { flex: 0 0 90px; }
+.name-group-num { flex: 0 0 115px; }
 .name-group-num input { text-align: center; }
 .name-group-num input::-webkit-outer-spin-button,
 .name-group-num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
