@@ -37,11 +37,11 @@ const BALL_M   = 1.0;
 // ─── Physics tuning ──────────────────────────────────────────────────────────
 
 const FRICTION_BALL       = 0.99;
-const FRICTION_PLAYER     = 0.78;
+const FRICTION_PLAYER     = 0.96;
 const RESTITUTION_DEFAULT = 0.5;
-const PLAYER_ACCEL        = 1.6;
-const PLAYER_MAX_SPD      = 5.2;
-const KICK_IMPULSE        = 14;
+const PLAYER_ACCEL        = 0.65;
+const PLAYER_MAX_SPD      = 4.5;
+const KICK_IMPULSE        = 9;
 const KICK_RANGE          = PLAYER_R + BALL_R + 12;
 const KICK_COOLDOWN       = 120;
 const BALL_MAX_SPD        = 30;
