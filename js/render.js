@@ -198,30 +198,28 @@ function drawPlayer(p) {
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  const spd = Math.hypot(p.vx, p.vy);
-  if (spd > 0.4) {
-    const dx = p.vx / spd;
-    const dy = p.vy / spd;
-    ctx.beginPath();
-    ctx.arc(p.x + dx * r * 0.52, p.y + dy * r * 0.52, 4, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fill();
-  }
-
   ctx.beginPath();
   ctx.arc(p.x - r * 0.3, p.y - r * 0.35, r * 0.2, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.fill();
 
-  // Jersey number inside circle
+  // Jersey number — auto-fit font to circle width
   const numStr = String(state.playerNumbers[p.team] ?? '');
   if (numStr) {
-    const fontSize = numStr.length <= 1 ? 12 : numStr.length === 2 ? 11 : numStr.length === 3 ? 9 : 7;
+    const maxW = r * 1.5;
+    let fontSize = 15;
     ctx.font = `bold ${fontSize}px Arial`;
+    while (fontSize > 7 && ctx.measureText(numStr).width > maxW) {
+      fontSize--;
+      ctx.font = `bold ${fontSize}px Arial`;
+    }
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.shadowBlur = 3;
+    ctx.shadowColor = 'rgba(0,0,0,0.9)';
+    ctx.fillStyle = 'white';
     ctx.fillText(numStr, p.x, p.y);
+    ctx.shadowBlur = 0;
   }
 
   // Name label below circle
