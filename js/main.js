@@ -60,7 +60,14 @@ function setupInput() {
     state.settings.aiDifficulty = e.target.value;
   });
 
-  document.getElementById('btn-ai').addEventListener('click', () => startGame('ai'));
+  document.getElementById('btn-ai').addEventListener('click', () => {
+    const aiRow = document.getElementById('ai-row');
+    if (aiRow.style.display !== 'flex') {
+      aiRow.style.display = 'flex';
+    } else {
+      startGame('ai');
+    }
+  });
 
   // Online mode toggle
   document.getElementById('btn-online').addEventListener('click', () => {

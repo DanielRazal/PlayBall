@@ -288,7 +288,7 @@ function setOverlayMode(mode) {
   document.getElementById('dropdowns-row').style.display = menuOnly;
   document.getElementById('overlay-score').style.display = mode === 'gameover' ? 'block' : 'none';
   if (mode !== 'menu') document.getElementById('online-panel').style.display = 'none';
-  const showAI = state.mode === 'ai' && (mode === 'menu' || mode === 'gameover');
+  const showAI = state.mode === 'ai' && mode === 'gameover';
   document.getElementById('ai-row').style.display = showAI ? 'flex' : 'none';
 }
 
