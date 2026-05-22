@@ -228,14 +228,30 @@ function tickRoom(code, room) {
     if (room.kickoffPending) {
       const cx = (room.field.left + room.field.right) / 2;
       const cy = (room.field.top  + room.field.bottom) / 2;
-      // Both teams locked to own half — hard line
-      if (p.team === 'red'  && p.x + p.radius > cx) { p.x = cx - p.radius; if (p.vx > 0) p.vx = 0; }
-      if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
-      // Non-kickoff team also blocked from entering the center circle
-      if (p.team !== room.kickoffTeam) {
-        const cdx = p.x - cx, cdy = p.y - cy;
-        const cdist = Math.hypot(cdx, cdy);
-        const minDist = 80 + p.radius;
+      const CIRCLE_R = 80;
+      const cdx = p.x - cx, cdy = p.y - cy;
+      const cdist = Math.hypot(cdx, cdy);
+
+      if (p.team === room.kickoffTeam) {
+        const maxDist = CIRCLE_R - p.radius;
+        const onOpponentSide = p.team === 'red' ? p.x > cx : p.x < cx;
+        if (onOpponentSide) {
+          if (cdist > maxDist) {
+            const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'red' ? 1 : -1);
+            const ny = cdist > 0.001 ? cdy / cdist : 0;
+            p.x = cx + nx * maxDist;
+            p.y = cy + ny * maxDist;
+            const vel = p.vx * nx + p.vy * ny;
+            if (vel > 0) { p.vx -= vel * nx; p.vy -= vel * ny; }
+          }
+        } else if (cdist > maxDist) {
+          if (p.team === 'red'  && p.x + p.radius > cx) { p.x = cx - p.radius; if (p.vx > 0) p.vx = 0; }
+          if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
+        }
+      } else {
+        if (p.team === 'red'  && p.x + p.radius > cx) { p.x = cx - p.radius; if (p.vx > 0) p.vx = 0; }
+        if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
+        const minDist = CIRCLE_R + p.radius;
         if (cdist < minDist) {
           const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
           const ny = cdist > 0.001 ? cdy / cdist : 0;

@@ -123,14 +123,34 @@ function updatePhysics() {
     clampPlayerToField(p);
 
     if (state.kickoffPending) {
-      // Both teams locked to own half — hard line
-      if (p.team === 'red'  && p.x + p.radius > FIELD.centerX) { p.x = FIELD.centerX - p.radius; if (p.vx > 0) p.vx = 0; }
-      if (p.team === 'blue' && p.x - p.radius < FIELD.centerX) { p.x = FIELD.centerX + p.radius; if (p.vx < 0) p.vx = 0; }
-      // Non-kickoff team also blocked from entering the center circle
-      if (p.team !== state.kickoffTeam) {
-        const cdx = p.x - FIELD.centerX, cdy = p.y - FIELD.centerY;
-        const cdist = Math.hypot(cdx, cdy);
-        const minDist = 80 + p.radius;
+      const CIRCLE_R = 80;
+      const cdx = p.x - FIELD.centerX, cdy = p.y - FIELD.centerY;
+      const cdist = Math.hypot(cdx, cdy);
+
+      if (p.team === state.kickoffTeam) {
+        const maxDist = CIRCLE_R - p.radius;   // body edge stays on circle line
+        const onOpponentSide = p.team === 'red' ? p.x > FIELD.centerX : p.x < FIELD.centerX;
+        if (onOpponentSide) {
+          // On opponent's side: enforce circle boundary (no body past circle)
+          if (cdist > maxDist) {
+            const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'red' ? 1 : -1);
+            const ny = cdist > 0.001 ? cdy / cdist : 0;
+            p.x = FIELD.centerX + nx * maxDist;
+            p.y = FIELD.centerY + ny * maxDist;
+            const vel = p.vx * nx + p.vy * ny;
+            if (vel > 0) { p.vx -= vel * nx; p.vy -= vel * ny; }
+          }
+        } else if (cdist > maxDist) {
+          // Own side AND outside circle footprint: block at center line to prevent glitchy side-entry
+          if (p.team === 'red'  && p.x + p.radius > FIELD.centerX) { p.x = FIELD.centerX - p.radius; if (p.vx > 0) p.vx = 0; }
+          if (p.team === 'blue' && p.x - p.radius < FIELD.centerX) { p.x = FIELD.centerX + p.radius; if (p.vx < 0) p.vx = 0; }
+        }
+      } else {
+        // Non-kickoff team: hard center line
+        if (p.team === 'red'  && p.x + p.radius > FIELD.centerX) { p.x = FIELD.centerX - p.radius; if (p.vx > 0) p.vx = 0; }
+        if (p.team === 'blue' && p.x - p.radius < FIELD.centerX) { p.x = FIELD.centerX + p.radius; if (p.vx < 0) p.vx = 0; }
+        // Also blocked from center circle
+        const minDist = CIRCLE_R + p.radius;
         if (cdist < minDist) {
           const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
           const ny = cdist > 0.001 ? cdy / cdist : 0;
