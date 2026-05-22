@@ -256,11 +256,11 @@ body {
 }
 #btn-restart:hover { box-shadow: 0 8px 28px rgba(200,120,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2); }
 
-#btn-menu {
+#btn-menu, #btn-to-menu {
   background: linear-gradient(160deg, #888 0%, #444 100%);
   box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
 }
-#btn-menu:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); }
+#btn-menu:hover, #btn-to-menu:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15); }
 
 #name-row {
   display: flex;

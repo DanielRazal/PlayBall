@@ -275,6 +275,7 @@ const elPauseBtnRow = () => document.getElementById('pause-btn-row');
 function setOverlayMode(mode) {
   elBtnRow().style.display      = mode === 'menu' || mode === 'gameover' ? 'flex' : 'none';
   elPauseBtnRow().style.display = mode === 'pause' ? 'flex' : 'none';
+  document.getElementById('btn-to-menu').style.display = mode === 'gameover' ? '' : 'none';
   const menuOnly = mode === 'menu' ? 'flex' : 'none';
   document.getElementById('name-row').style.display      = menuOnly;
   document.getElementById('settings-row').style.display  = menuOnly;
