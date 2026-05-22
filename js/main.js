@@ -12,6 +12,7 @@ function setupInput() {
 
   document.addEventListener('keydown', (e) => {
     if (document.activeElement === document.getElementById('chat-input')) return;
+    if (document.activeElement === document.getElementById('name-red')) return;
     if (PREVENT.has(e.code)) e.preventDefault();
     if (e.code === 'Escape') {
       if (state.phase === 'playing') pauseGame();
@@ -67,14 +68,14 @@ function setupInput() {
   });
 
   document.getElementById('btn-create-room').addEventListener('click', () => {
-    const name = document.getElementById('name-red').value.trim() || 'Player';
+    const name = document.getElementById('name-red').value || 'Player';
     state.settings.humanTeam = 'red';
     netCreateRoom(state.settings, name);
   });
 
   document.getElementById('btn-join-room').addEventListener('click', () => {
     const code = document.getElementById('net-join-code').value.trim();
-    const name = document.getElementById('name-red').value.trim() || 'Player';
+    const name = document.getElementById('name-red').value || 'Player';
     if (!code) return;
     state.settings.humanTeam = 'blue';
     netJoinRoom(code, name);
