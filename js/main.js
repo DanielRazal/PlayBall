@@ -103,40 +103,46 @@ function setupInput() {
 
 // ─── Chat setup ───────────────────────────────────────────────────────────────
 
+function syncChatMode() {
+  const input     = document.getElementById('chat-input');
+  const sendBtn   = document.getElementById('chat-send');
+  const playerBtn = document.getElementById('chat-player-btn');
+  const online    = isOnline();
+
+  input.disabled    = !online;
+  sendBtn.disabled  = !online;
+  input.placeholder = online ? 'Press Enter to chat...' : '';
+
+  const side = online ? (getMyTeam() || 'red') : 'red';
+  playerBtn.textContent = side === 'red'
+    ? (state.names.red  || 'RED')
+    : (state.names.blue || 'BLUE');
+  playerBtn.className = 'chat-player ' + side;
+}
+
 function setupChat() {
   const input     = document.getElementById('chat-input');
   const sendBtn   = document.getElementById('chat-send');
   const playerBtn = document.getElementById('chat-player-btn');
 
-  let activeSide = 'red';
-
-  syncPlayerBtn();
-
-  playerBtn.addEventListener('click', () => {
-    activeSide = activeSide === 'red' ? 'blue' : 'red';
-    syncPlayerBtn();
-  });
-
-  function syncPlayerBtn() {
-    playerBtn.textContent = activeSide === 'red'
-      ? (state.names.red  || 'RED')
-      : (state.names.blue || 'BLUE');
-    playerBtn.className = 'chat-player ' + activeSide;
-  }
+  // Not clickable — just a label showing your own team
+  playerBtn.style.cursor = 'default';
+  playerBtn.style.pointerEvents = 'none';
 
   function sendMessage() {
+    if (!isOnline()) return;
     const text = input.value.trim();
     input.value = '';
     input.blur();
     if (!text) return;
 
-    syncPlayerBtn();
-    const name = activeSide === 'red'
+    const side = getMyTeam() || 'red';
+    const name = side === 'red'
       ? (state.names.red  || 'Red')
       : (state.names.blue || 'Blue');
 
-    addChatMessage(activeSide, name, text);
-    if (isOnline()) netSendChat(activeSide, name, text);
+    addChatMessage(side, name, text);
+    netSendChat(side, name, text);
   }
 
   sendBtn.addEventListener('click', sendMessage);
@@ -146,6 +152,8 @@ function setupChat() {
     if (e.code === 'Enter')  { e.preventDefault(); sendMessage(); }
     if (e.code === 'Escape') { e.preventDefault(); input.value = ''; input.blur(); }
   });
+
+  syncChatMode();
 }
 
 function addChatMessage(team, name, text) {

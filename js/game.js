@@ -57,6 +57,7 @@ function startGame(mode) {
   resetPlayers();
   updateHUD();
   hideOverlay();
+  syncChatMode();
 }
 
 // ─── Physics update ───────────────────────────────────────────────────────────
@@ -263,4 +264,5 @@ function restartGame() {
 function goToMenu() {
   state.phase = 'menu';
   showMainMenu();
+  syncChatMode();
 }

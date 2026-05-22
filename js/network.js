@@ -148,6 +148,7 @@ function startOnlineGame() {
   GOAL_DEEP = fs.goalDeep;
   state.phase = 'playing';
   hideOverlay();
+  syncChatMode();
 }
 
 function netLeave() {
@@ -155,6 +156,7 @@ function netLeave() {
   if (socket) socket.disconnect();
   socket = null;
   myTeam = null;
+  syncChatMode();
 }
 
 function isOnline() { return onlineMode; }
