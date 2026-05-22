@@ -300,7 +300,7 @@ function setOverlayMode(mode) {
   const nameDisplay = document.getElementById('name-display');
   if (mode === 'menu') {
     const saved = localStorage.getItem('playball_nickname');
-    nameDisplay.textContent = '👤 ' + (saved || 'Player') + ' · change';
+    nameDisplay.textContent = '👤 ' + (saved || 'Player') + ' · CHANGE NICKNAME';
     nameDisplay.style.display = '';
   } else {
     nameDisplay.style.display = 'none';
