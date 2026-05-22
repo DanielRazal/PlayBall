@@ -30,9 +30,11 @@ const GOAL_PAUSE_MS     = 1000;
 const TICK_RATE         = 60;   // server ticks per second
 
 const FIELD_SIZES = {
+  tiny:   { left: 200, right: 600, top: 130, bottom: 370, goalH: 80,  goalDeep: 22 },
   small:  { left: 130, right: 670, top: 90,  bottom: 410, goalH: 100, goalDeep: 28 },
   medium: { left: 42,  right: 758, top: 42,  bottom: 458, goalH: 130, goalDeep: 32 },
   large:  { left: 38,  right: 762, top: 8,   bottom: 492, goalH: 155, goalDeep: 32 },
+  xl:     { left: 10,  right: 790, top: 2,   bottom: 498, goalH: 175, goalDeep: 36 },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
