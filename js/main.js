@@ -291,6 +291,57 @@ function applyNetExtrapolation() {
   }
 }
 
+// ─── Mobile scaling ──────────────────────────────────────────────────────────
+
+function applyMobileScale() {
+  const W = 804;
+  const vw = window.innerWidth;
+  const el = document.getElementById('container');
+  if (vw < W) {
+    const scale = vw / W;
+    el.style.transform = `scale(${scale})`;
+    el.style.transformOrigin = 'top center';
+    el.style.marginBottom = `${-(el.offsetHeight * (1 - scale))}px`;
+  } else {
+    el.style.transform = '';
+    el.style.marginBottom = '';
+  }
+}
+
+// ─── Touch controls ───────────────────────────────────────────────────────────
+
+function setupTouchControls() {
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (!isTouchDevice) return;
+
+  const controls = document.getElementById('touch-controls');
+  const overlay  = document.getElementById('overlay');
+
+  function syncVisibility() {
+    controls.style.display = overlay.classList.contains('hidden') ? 'flex' : 'none';
+  }
+  new MutationObserver(syncVisibility).observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  syncVisibility();
+
+  function setKey(action, val) {
+    if (isOnline()) {
+      const myP = state.players.find(p => p.team === getMyTeam());
+      if (myP) myP.keys[action] = val;
+    } else {
+      const idx = state.players[0].isAI ? 1 : 0;
+      state.players[idx].keys[action] = val;
+    }
+  }
+
+  const btnMap = { 'tc-up': 'up', 'tc-down': 'down', 'tc-left': 'left', 'tc-right': 'right', 'tc-kick': 'kick' };
+  Object.entries(btnMap).forEach(([id, action]) => {
+    const btn = document.getElementById(id);
+    btn.addEventListener('touchstart',  (e) => { e.preventDefault(); btn.classList.add('pressed');    setKey(action, true);  }, { passive: false });
+    btn.addEventListener('touchend',    (e) => { e.preventDefault(); btn.classList.remove('pressed'); setKey(action, false); }, { passive: false });
+    btn.addEventListener('touchcancel', ()  => { btn.classList.remove('pressed'); setKey(action, false); });
+  });
+}
+
 // ─── Game loop ────────────────────────────────────────────────────────────────
 
 function gameLoop(timestamp) {
@@ -331,6 +382,9 @@ window.addEventListener('load', () => {
   }
   setupInput();
   setupChat();
+  applyMobileScale();
+  window.addEventListener('resize', applyMobileScale);
+  setupTouchControls();
   showMainMenu();
   render();
   requestAnimationFrame((ts) => {
