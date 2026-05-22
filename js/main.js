@@ -18,6 +18,7 @@ function setupInput() {
     if (e.code === 'Escape') {
       if (state.phase === 'playing') pauseGame();
       else if (state.phase === 'paused') resumeGame();
+      else if (state.phase === 'menu' && document.getElementById('ai-row').style.display === 'flex') showMainMenu();
       return;
     }
     const m = KEY_MAP[e.code];
@@ -56,17 +57,37 @@ function setupInput() {
   document.getElementById('sel-size').addEventListener('change', e => {
     state.settings.fieldSize = e.target.value;
   });
-  document.getElementById('sel-diff').addEventListener('change', e => {
-    state.settings.aiDifficulty = e.target.value;
-  });
 
   document.getElementById('btn-ai').addEventListener('click', () => {
-    const aiRow = document.getElementById('ai-row');
-    if (aiRow.style.display !== 'flex') {
-      aiRow.style.display = 'flex';
-    } else {
-      startGame('ai');
-    }
+    // Hide full menu, show only difficulty buttons
+    document.getElementById('settings-row').style.display  = 'none';
+    document.getElementById('name-row').style.display      = 'none';
+    document.getElementById('dropdowns-row').style.display = 'none';
+    document.getElementById('online-panel').style.display  = 'none';
+    elBtnRow().style.display = 'none';
+    elMsg().textContent      = '';
+    elTitle().textContent    = 'CHOOSE DIFFICULTY';
+    updateDiffButtons();
+    document.getElementById('ai-row').style.display = 'flex';
+  });
+
+  function updateDiffButtons() {
+    const cur = state.settings.aiDifficulty || 'medium';
+    ['easy', 'medium', 'hard'].forEach(d => {
+      document.getElementById('diff-' + d).classList.toggle('diff-active', d === cur);
+    });
+  }
+
+  ['easy', 'medium', 'hard'].forEach(diff => {
+    document.getElementById('diff-' + diff).addEventListener('click', () => {
+      state.settings.aiDifficulty = diff;
+      document.getElementById('sel-diff').value = diff;
+      if (state.phase === 'gameover') {
+        restartGame();
+      } else {
+        startGame('ai');
+      }
+    });
   });
 
   // Online mode toggle

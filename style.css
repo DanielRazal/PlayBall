@@ -188,6 +188,35 @@ body {
   letter-spacing: 1px;
 }
 
+#ai-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.diff-btn {
+  padding: 18px 32px;
+  border: none;
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+  transition: transform 0.15s, filter 0.15s, box-shadow 0.15s;
+}
+.diff-easy   { background: linear-gradient(135deg, #3db832, #27801e); }
+.diff-medium { background: linear-gradient(135deg, #e0a020, #b07010); }
+.diff-hard   { background: linear-gradient(135deg, #e03030, #aa1010); }
+.diff-btn:hover  { filter: brightness(1.15); transform: translateY(-2px); }
+.diff-btn:active { transform: scale(0.96); }
+.diff-btn.diff-active { box-shadow: 0 0 0 3px white, 0 4px 18px rgba(0,0,0,0.4); }
+
 #btn-row,
 #pause-btn-row {
   display: flex;

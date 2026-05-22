@@ -102,14 +102,10 @@
           </div>
 
           <div id="ai-row" style="display:none">
-            <div class="dropdown-group" id="ai-level-group">
-              <label>AI Level</label>
-              <select id="sel-diff">
-                <option value="easy">Easy</option>
-                <option value="medium" selected>Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
+            <button class="diff-btn diff-easy"   id="diff-easy">EASY</button>
+            <button class="diff-btn diff-medium" id="diff-medium">MEDIUM</button>
+            <button class="diff-btn diff-hard"   id="diff-hard">HARD</button>
+            <input id="sel-diff" type="hidden" value="medium">
           </div>
           <div id="btn-row">
             <button id="btn-ai">vs AI</button>
