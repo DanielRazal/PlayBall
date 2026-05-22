@@ -20,6 +20,8 @@ function applyKick(p) {
   b.vx += (dx / dist) * KICK_IMPULSE;
   b.vy += (dy / dist) * KICK_IMPULSE;
 
+  if (state.kickoffPending) state.kickoffPending = false;
+
   const bspd = Math.hypot(b.vx, b.vy);
   if (bspd > BALL_MAX_SPD) {
     b.vx = (b.vx / bspd) * BALL_MAX_SPD;

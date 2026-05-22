@@ -103,6 +103,7 @@ function applyKick(p, b, now, room) {
   b.vy += dy / dist * KICK_IMPULSE;
   const spd = Math.hypot(b.vx, b.vy);
   if (spd > BALL_MAX_SPD) { b.vx = b.vx / spd * BALL_MAX_SPD; b.vy = b.vy / spd * BALL_MAX_SPD; }
+  if (room && room.kickoffPending) room.kickoffPending = false;
 }
 
 function resolveCollision(a, b) {
