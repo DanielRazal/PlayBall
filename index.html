@@ -53,14 +53,13 @@
             </div>
             <div class="setting-sep"></div>
             <div class="setting-group">
-              <label for="setting-extrap">Extrapolation</label>
+              <label for="setting-extrap">Extrap.</label>
               <div class="setting-input-wrap">
-                <button class="setting-btn" data-target="setting-extrap" data-delta="-20" data-min="0" data-max="500">−</button>
-                <span id="setting-extrap-display">200 ms</span>
-                <input id="setting-extrap" type="hidden" value="200">
-                <button class="setting-btn" data-target="setting-extrap" data-delta="20" data-min="0" data-max="500">+</button>
+                <button class="setting-btn" data-target="setting-extrap" data-delta="-5" data-min="0" data-max="500">−</button>
+                <input id="setting-extrap" class="setting-extrap-input" type="number" min="0" max="500" step="5" value="200">
+                <button class="setting-btn" data-target="setting-extrap" data-delta="5" data-min="0" data-max="500">+</button>
               </div>
-              <span class="setting-sub">ms online lag comp (0 = off)</span>
+              <span class="setting-sub">ms lag comp (0 = off)</span>
             </div>
           </div>
           <div id="name-row">

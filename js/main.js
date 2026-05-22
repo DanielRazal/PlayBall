@@ -96,8 +96,6 @@ function setupInput() {
     const val   = parseInt(input.value);
     if (inputId === 'setting-time') {
       disp.textContent = val === 0 ? '∞' : `${val}:00`;
-    } else if (inputId === 'setting-extrap') {
-      disp.textContent = val === 0 ? 'OFF' : `${val} ms`;
     } else {
       disp.textContent = val === 0 ? '∞' : val;
     }
@@ -110,11 +108,18 @@ function setupInput() {
       const min   = btn.dataset.min !== undefined ? parseInt(btn.dataset.min) : 0;
       const max   = btn.dataset.max !== undefined ? parseInt(btn.dataset.max) : 10;
       input.value = Math.max(min, Math.min(max, parseInt(input.value) + delta));
-      updateSettingDisplay(btn.dataset.target);
+      if (input.type === 'hidden') updateSettingDisplay(btn.dataset.target);
       if (btn.dataset.target === 'setting-extrap') {
-        state.settings.extrapolation = parseInt(input.value);
+        state.settings.extrapolation = parseInt(input.value) || 0;
       }
     });
+  });
+
+  document.getElementById('setting-extrap').addEventListener('input', (e) => {
+    let val = parseInt(e.target.value);
+    if (isNaN(val) || val < 0) val = 0;
+    if (val > 500) val = 500;
+    state.settings.extrapolation = val;
   });
 }
 

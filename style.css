@@ -481,6 +481,23 @@ body {
   transform: scale(0.95);
 }
 
+.setting-extrap-input {
+  width: 58px;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  text-align: center;
+  outline: none;
+  padding: 2px 4px;
+}
+.setting-extrap-input:focus { border-color: rgba(100,150,255,0.6); }
+.setting-extrap-input::-webkit-outer-spin-button,
+.setting-extrap-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.setting-extrap-input[type=number] { -moz-appearance: textfield; }
+
 .setting-sub {
   font-size: 11px;
   color: #667799;
