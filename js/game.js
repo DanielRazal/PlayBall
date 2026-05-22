@@ -273,9 +273,8 @@ function updateHUD() {
 const elPauseBtnRow = () => document.getElementById('pause-btn-row');
 
 function setOverlayMode(mode) {
-  elBtnRow().style.display      = mode === 'menu' || mode === 'gameover' ? 'flex' : 'none';
-  elPauseBtnRow().style.display = mode === 'pause' ? 'flex' : 'none';
-  document.getElementById('btn-to-menu').style.display = mode === 'gameover' ? '' : 'none';
+  elBtnRow().style.display      = mode === 'menu' ? 'flex' : 'none';
+  elPauseBtnRow().style.display = mode === 'pause' || mode === 'gameover' ? 'flex' : 'none';
   const menuOnly = mode === 'menu' ? 'flex' : 'none';
   document.getElementById('name-row').style.display      = menuOnly;
   document.getElementById('settings-row').style.display  = menuOnly;
@@ -331,9 +330,12 @@ function pauseGame() {
 }
 
 function resumeGame() {
-  if (state.phase !== 'paused') return;
-  state.phase = 'playing';
-  hideOverlay();
+  if (state.phase === 'paused') {
+    state.phase = 'playing';
+    hideOverlay();
+  } else if (state.phase === 'gameover') {
+    restartGame();
+  }
 }
 
 function restartGame() {

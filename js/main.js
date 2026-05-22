@@ -47,7 +47,6 @@ function setupInput() {
   document.getElementById('btn-resume').addEventListener('click', resumeGame);
   document.getElementById('btn-restart').addEventListener('click', restartGame);
   document.getElementById('btn-menu').addEventListener('click', goToMenu);
-  document.getElementById('btn-to-menu').addEventListener('click', goToMenu);
 
   document.getElementById('sel-theme').addEventListener('change', e => {
     state.settings.theme = e.target.value;
