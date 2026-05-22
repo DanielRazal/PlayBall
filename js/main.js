@@ -156,10 +156,16 @@ function setupInput() {
 
   function confirmName() {
     localStorage.setItem('playball_nickname', document.getElementById('name-red').value);
+    setNameConfirmed(true);
     showMainMenu();
   }
 
   document.getElementById('btn-confirm-name').addEventListener('click', confirmName);
+
+  document.getElementById('name-display').addEventListener('click', () => {
+    setNameConfirmed(false);
+    showMainMenu();
+  });
 
   document.getElementById('name-red').addEventListener('keydown', (e) => {
     e.stopPropagation();
@@ -318,7 +324,10 @@ window.addEventListener('load', () => {
   ctx    = canvas.getContext('2d');
   preloadLogos();
   const _savedName = localStorage.getItem('playball_nickname');
-  if (_savedName !== null) document.getElementById('name-red').value = _savedName;
+  if (_savedName !== null) {
+    document.getElementById('name-red').value = _savedName;
+    setNameConfirmed(true);
+  }
   setupInput();
   setupChat();
   showMainMenu();

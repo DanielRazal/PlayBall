@@ -235,6 +235,16 @@ body {
 #btn-confirm-name:hover  { filter: brightness(1.15); transform: translateY(-2px); }
 #btn-confirm-name:active { transform: scale(0.96); }
 
+#name-display {
+  font-size: 13px;
+  color: rgba(150, 180, 255, 0.5);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: color 0.15s;
+  margin-top: -4px;
+}
+#name-display:hover { color: rgba(150, 180, 255, 0.9); }
+
 #name-red::placeholder {
   color: #aabbff;
   letter-spacing: 1px;

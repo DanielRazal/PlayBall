@@ -1,5 +1,8 @@
 'use strict';
 
+let _nameConfirmed = false;
+function setNameConfirmed(v) { _nameConfirmed = v; }
+
 // ─── In-game notifications ────────────────────────────────────────────────────
 
 let _notifTimer = null;
@@ -284,7 +287,7 @@ function setOverlayMode(mode) {
   elPauseBtnRow().style.display = mode === 'pause' || mode === 'gameover' ? 'flex' : 'none';
   document.getElementById('btn-resume').style.display = mode === 'gameover' ? 'none' : '';
   const menuOnly = mode === 'menu' ? 'flex' : 'none';
-  document.getElementById('name-row').style.display      = (mode === 'menu' || mode === 'pause' || mode === 'gameover' || isNameEntry) ? 'flex' : 'none';
+  document.getElementById('name-row').style.display      = isNameEntry ? 'flex' : 'none';
   document.getElementById('settings-row').style.display  = menuOnly;
   document.getElementById('dropdowns-row').style.display = menuOnly;
   document.getElementById('overlay-score').style.display = mode === 'gameover' ? 'block' : 'none';
@@ -294,13 +297,21 @@ function setOverlayMode(mode) {
   document.getElementById('btn-confirm-name').style.display = isNameEntry ? '' : 'none';
   document.getElementById('tag-group').style.display = isNameEntry ? 'none' : '';
   document.getElementById('overlay-box').classList.toggle('nameentry', isNameEntry);
+  const nameDisplay = document.getElementById('name-display');
+  if (mode === 'menu') {
+    const saved = localStorage.getItem('playball_nickname');
+    nameDisplay.textContent = '👤 ' + (saved || 'Player') + ' · change';
+    nameDisplay.style.display = '';
+  } else {
+    nameDisplay.style.display = 'none';
+  }
 }
 
 function showMainMenu() {
   elOverlay().classList.remove('hidden');
   elTitle().textContent = 'PLAYBALL';
   elMsg().textContent   = '';
-  if (localStorage.getItem('playball_nickname') === null) {
+  if (!_nameConfirmed) {
     setOverlayMode('nameentry');
     setTimeout(() => document.getElementById('name-red').focus(), 50);
   } else {
