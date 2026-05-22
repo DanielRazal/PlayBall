@@ -151,6 +151,7 @@ function netJoinRoom(code, name, playerNumber) {
 function startOnlineGame() {
   onlineMode = true;
   lastSentKeys = null;
+  document.getElementById('ai-level-group').style.display = 'none';
   // Apply field size from settings
   const fs = FIELD_SIZES[state.settings.fieldSize] || FIELD_SIZES.medium;
   FIELD.left = fs.left; FIELD.right = fs.right;

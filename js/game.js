@@ -295,6 +295,7 @@ function showMainMenu() {
   elTitle().textContent = 'PLAYBALL';
   elMsg().textContent   = '';
   setOverlayMode('menu');
+  document.getElementById('ai-level-group').style.display = state.mode === 'ai' ? '' : 'none';
 }
 
 
