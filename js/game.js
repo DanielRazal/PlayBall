@@ -16,6 +16,7 @@ function resetPlayers() {
     p.x  = p.team === 'red' ? FIELD.centerX - 130 : FIELD.centerX + 130;
     p.y  = FIELD.centerY;
     p.vx = p.vy = 0;
+    p.keys.up = p.keys.down = p.keys.left = p.keys.right = p.keys.kick = false;
   }
 }
 
