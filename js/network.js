@@ -75,6 +75,13 @@ function netConnect() {
       }
     }
 
+    // Save authoritative snapshot for client-side extrapolation
+    state.netSnapshot = {
+      t:       performance.now(),
+      ball:    { x: s.ball.x, y: s.ball.y, vx: s.ball.vx, vy: s.ball.vy, angle: s.ball.angle },
+      players: s.players.map(p => ({ id: p.id, x: p.x, y: p.y, vx: p.vx, vy: p.vy })),
+    };
+
     updateHUD();
 
     if (s.phase === 'goal') {

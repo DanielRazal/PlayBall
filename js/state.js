@@ -43,6 +43,7 @@ const state = {
   ],
 
   aiFrameSkip: 0,
+  netSnapshot: null,
 };
 
 // ─── Key bindings ─────────────────────────────────────────────────────────────

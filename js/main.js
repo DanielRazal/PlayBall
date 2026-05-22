@@ -188,6 +188,32 @@ function addSystemMessage(text) {
   log.scrollTop = log.scrollHeight;
 }
 
+// ─── Client-side extrapolation (online mode) ─────────────────────────────────
+
+function applyNetExtrapolation() {
+  const snap = state.netSnapshot;
+  if (!snap) return;
+  const frames = Math.min((performance.now() - snap.t) / (1000 / 60), 20);
+  if (frames < 0.01) return;
+
+  function extrap(pos, vel, friction) {
+    return pos + vel * (1 - Math.pow(friction, frames)) / (1 - friction);
+  }
+
+  const b = state.ball;
+  b.x     = extrap(snap.ball.x, snap.ball.vx, FRICTION_BALL);
+  b.y     = extrap(snap.ball.y, snap.ball.vy, FRICTION_BALL);
+  b.angle = snap.ball.angle + Math.hypot(snap.ball.vx, snap.ball.vy) * 0.06 * frames;
+
+  for (const sp of snap.players) {
+    const lp = state.players.find(p => p.id === sp.id);
+    if (lp) {
+      lp.x = extrap(sp.x, sp.vx, FRICTION_PLAYER);
+      lp.y = extrap(sp.y, sp.vy, FRICTION_PLAYER);
+    }
+  }
+}
+
 // ─── Game loop ────────────────────────────────────────────────────────────────
 
 function gameLoop(timestamp) {
@@ -199,6 +225,7 @@ function gameLoop(timestamp) {
       // Send local player's keys to server; server runs all physics
       const myP = state.players.find(p => p.team === getMyTeam());
       if (myP) netSendInput({ ...myP.keys });
+      applyNetExtrapolation();
     } else {
       updateTimer(dt);
       updatePhysics();
