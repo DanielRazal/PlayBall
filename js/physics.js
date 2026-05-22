@@ -82,25 +82,17 @@ function resolveBallWalls() {
   const gb = GOAL_BOT();
   const r  = b.radius;
 
-  if (b.y - r < FIELD.top) {
-    b.y  = FIELD.top + r;
-    b.vy = Math.abs(b.vy) * RESTITUTION_DEFAULT;
-  }
-  if (b.y + r > FIELD.bottom) {
-    b.y  = FIELD.bottom - r;
-    b.vy = -Math.abs(b.vy) * RESTITUTION_DEFAULT;
-  }
-  if (b.x - r < FIELD.left) {
-    if (!(b.y > gt && b.y < gb)) {
-      b.x  = FIELD.left + r;
-      b.vx = Math.abs(b.vx) * RESTITUTION_DEFAULT;
-    }
-  }
-  if (b.x + r > FIELD.right) {
-    if (!(b.y > gt && b.y < gb)) {
-      b.x  = FIELD.right - r;
-      b.vx = -Math.abs(b.vx) * RESTITUTION_DEFAULT;
-    }
+  let hitLeft = false, hitRight = false, hitTop = false, hitBot = false;
+
+  if (b.y - r < FIELD.top)    { b.y = FIELD.top    + r; b.vy =  Math.abs(b.vy) * RESTITUTION_DEFAULT; hitTop   = true; }
+  if (b.y + r > FIELD.bottom) { b.y = FIELD.bottom - r; b.vy = -Math.abs(b.vy) * RESTITUTION_DEFAULT; hitBot   = true; }
+  if (b.x - r < FIELD.left  && !(b.y > gt && b.y < gb)) { b.x = FIELD.left  + r; b.vx =  Math.abs(b.vx) * RESTITUTION_DEFAULT; hitLeft  = true; }
+  if (b.x + r > FIELD.right && !(b.y > gt && b.y < gb)) { b.x = FIELD.right - r; b.vx = -Math.abs(b.vx) * RESTITUTION_DEFAULT; hitRight = true; }
+
+  // Corner escape: push ball away from corner so it doesn't get trapped
+  if ((hitLeft || hitRight) && (hitTop || hitBot)) {
+    b.vx += hitLeft  ?  2.5 : -2.5;
+    b.vy += hitTop   ?  2.5 : -2.5;
   }
 }
 

@@ -131,10 +131,15 @@ function resolveCollision(a, b) {
 function resolveBallWalls(room) {
   const b = room.ball, f = room.field;
   const gt = goalTop(room), gb = goalBot(room), r = b.radius;
-  if (b.y - r < f.top)    { b.y = f.top + r;    b.vy =  Math.abs(b.vy) * RESTITUTION; }
-  if (b.y + r > f.bottom) { b.y = f.bottom - r;  b.vy = -Math.abs(b.vy) * RESTITUTION; }
-  if (b.x - r < f.left  && !(b.y > gt && b.y < gb)) { b.x = f.left + r;  b.vx =  Math.abs(b.vx) * RESTITUTION; }
-  if (b.x + r > f.right && !(b.y > gt && b.y < gb)) { b.x = f.right - r; b.vx = -Math.abs(b.vx) * RESTITUTION; }
+  let hitLeft = false, hitRight = false, hitTop = false, hitBot = false;
+  if (b.y - r < f.top)    { b.y = f.top    + r; b.vy =  Math.abs(b.vy) * RESTITUTION; hitTop   = true; }
+  if (b.y + r > f.bottom) { b.y = f.bottom - r; b.vy = -Math.abs(b.vy) * RESTITUTION; hitBot   = true; }
+  if (b.x - r < f.left  && !(b.y > gt && b.y < gb)) { b.x = f.left  + r; b.vx =  Math.abs(b.vx) * RESTITUTION; hitLeft  = true; }
+  if (b.x + r > f.right && !(b.y > gt && b.y < gb)) { b.x = f.right - r; b.vx = -Math.abs(b.vx) * RESTITUTION; hitRight = true; }
+  if ((hitLeft || hitRight) && (hitTop || hitBot)) {
+    b.vx += hitLeft  ?  2.5 : -2.5;
+    b.vy += hitTop   ?  2.5 : -2.5;
+  }
 }
 
 function clampPlayer(p, f) {
