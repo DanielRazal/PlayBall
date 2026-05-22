@@ -36,7 +36,7 @@ function drawFieldMarkings() {
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(FIELD.centerX, FIELD.centerY, 58, 0, Math.PI * 2);
+  ctx.arc(FIELD.centerX, FIELD.centerY, 80, 0, Math.PI * 2);
   ctx.stroke();
 
   ctx.fillStyle = t.lines;
@@ -235,7 +235,7 @@ function render() {
   const t       = getTheme();
   const logoImg = LOGO_IMGS[state.settings.theme];
   if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
-    const r = 54;
+    const r = 76;
     ctx.save();
     ctx.beginPath();
     ctx.arc(FIELD.centerX, FIELD.centerY, r, 0, Math.PI * 2);

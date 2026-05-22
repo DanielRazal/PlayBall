@@ -123,14 +123,14 @@ function updatePhysics() {
     clampPlayerToField(p);
 
     if (state.kickoffPending) {
-      // both teams stay in their own half
+      // Both teams locked to own half — hard line
       if (p.team === 'red'  && p.x + p.radius > FIELD.centerX) { p.x = FIELD.centerX - p.radius; if (p.vx > 0) p.vx = 0; }
       if (p.team === 'blue' && p.x - p.radius < FIELD.centerX) { p.x = FIELD.centerX + p.radius; if (p.vx < 0) p.vx = 0; }
-      // non-kickoff team also can't enter the center circle
+      // Non-kickoff team also blocked from entering the center circle
       if (p.team !== state.kickoffTeam) {
         const cdx = p.x - FIELD.centerX, cdy = p.y - FIELD.centerY;
         const cdist = Math.hypot(cdx, cdy);
-        const minDist = 58 + p.radius;
+        const minDist = 80 + p.radius;
         if (cdist < minDist) {
           const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
           const ny = cdist > 0.001 ? cdy / cdist : 0;
@@ -154,8 +154,14 @@ function updatePhysics() {
 
   applyKick(p0);
   applyKick(p1);
-  if (!state.kickoffPending || p0.team === state.kickoffTeam) resolveCircleCollision(p0, b);
-  if (!state.kickoffPending || p1.team === state.kickoffTeam) resolveCircleCollision(p1, b);
+  if (!state.kickoffPending || p0.team === state.kickoffTeam) {
+    if (Math.hypot(b.x - p0.x, b.y - p0.y) < p0.radius + b.radius + 1) state.lastTouchTeam = p0.team;
+    resolveCircleCollision(p0, b);
+  }
+  if (!state.kickoffPending || p1.team === state.kickoffTeam) {
+    if (Math.hypot(b.x - p1.x, b.y - p1.y) < p1.radius + b.radius + 1) state.lastTouchTeam = p1.team;
+    resolveCircleCollision(p1, b);
+  }
   resolveCircleCollision(p0, p1);
 
   if (state.kickoffPending) {
@@ -186,7 +192,11 @@ function triggerGoal(team) {
   state.lastGoalTeam = team;
   updateHUD();
 
-  const name = state.names[team] || team.toUpperCase();
+  const isOwnGoal   = state.lastTouchTeam !== null && state.lastTouchTeam !== team;
+  const displayName = isOwnGoal
+    ? (state.names[state.lastTouchTeam] || state.lastTouchTeam.toUpperCase()) + ' (OG)'
+    : (state.names[team] || team.toUpperCase());
+  state.lastTouchTeam = null;
 
   if (state.goldenGoal) {
     state.phase = 'gameover';
@@ -201,7 +211,7 @@ function triggerGoal(team) {
     return;
   }
 
-  showGoalNotif(name, state.score.red, state.score.blue);
+  showGoalNotif(displayName, state.score.red, state.score.blue);
 
   state.kickoffTeam    = team === 'red' ? 'blue' : 'red';
   state.kickoffPending = true;

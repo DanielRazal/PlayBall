@@ -12,6 +12,7 @@ const state = {
   timeLeft:  GAME_DURATION,
   goalTimer: 0,
   lastGoalTeam: null,
+  lastTouchTeam: null,
   lastTime: 0,
   settings: { timeMins: 3, scoreLimit: 3, humanTeam: 'red', aiDifficulty: 'medium', fieldSize: 'medium', theme: 'arsenal' },
   names: { red: 'Red', blue: 'Blue' },

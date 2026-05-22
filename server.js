@@ -68,6 +68,7 @@ function createRoom(settings) {
     kickoffPending: true,
     timeLeft:       settings.timeMins > 0 ? settings.timeMins * 60 : Infinity,
     goalTimer: 0,
+    lastTouchTeam: null,
     names:    { red: 'Red', blue: 'Blue' },
     sockets:  { red: null, blue: null },
     ball: { x: cx, y: cy, vx: 0, vy: 0, radius: BALL_R, mass: BALL_M, angle: 0 },
@@ -99,6 +100,7 @@ function applyKick(p, b, now, room) {
   const dist = Math.hypot(dx, dy);
   if (dist > KICK_RANGE || now - p.lastKickTime < KICK_COOLDOWN) return;
   p.lastKickTime = now;
+  if (room) room.lastTouchTeam = p.team;
   b.vx += dx / dist * KICK_IMPULSE;
   b.vy += dy / dist * KICK_IMPULSE;
   const spd = Math.hypot(b.vx, b.vy);
@@ -226,14 +228,14 @@ function tickRoom(code, room) {
     if (room.kickoffPending) {
       const cx = (room.field.left + room.field.right) / 2;
       const cy = (room.field.top  + room.field.bottom) / 2;
-      // both teams stay in their own half
+      // Both teams locked to own half — hard line
       if (p.team === 'red'  && p.x + p.radius > cx) { p.x = cx - p.radius; if (p.vx > 0) p.vx = 0; }
       if (p.team === 'blue' && p.x - p.radius < cx) { p.x = cx + p.radius; if (p.vx < 0) p.vx = 0; }
-      // non-kickoff team also can't enter the center circle
+      // Non-kickoff team also blocked from entering the center circle
       if (p.team !== room.kickoffTeam) {
         const cdx = p.x - cx, cdy = p.y - cy;
         const cdist = Math.hypot(cdx, cdy);
-        const minDist = 58 + p.radius;
+        const minDist = 80 + p.radius;
         if (cdist < minDist) {
           const nx = cdist > 0.001 ? cdx / cdist : (p.team === 'blue' ? 1 : -1);
           const ny = cdist > 0.001 ? cdy / cdist : 0;
@@ -254,8 +256,14 @@ function tickRoom(code, room) {
 
   resolveBallWalls(room);
   applyKick(p0, b, now, room); applyKick(p1, b, now, room);
-  if (!room.kickoffPending || p0.team === room.kickoffTeam) resolveCollision(p0, b);
-  if (!room.kickoffPending || p1.team === room.kickoffTeam) resolveCollision(p1, b);
+  if (!room.kickoffPending || p0.team === room.kickoffTeam) {
+    if (Math.hypot(b.x - p0.x, b.y - p0.y) < p0.radius + b.radius + 1) room.lastTouchTeam = p0.team;
+    resolveCollision(p0, b);
+  }
+  if (!room.kickoffPending || p1.team === room.kickoffTeam) {
+    if (Math.hypot(b.x - p1.x, b.y - p1.y) < p1.radius + b.radius + 1) room.lastTouchTeam = p1.team;
+    resolveCollision(p1, b);
+  }
   resolveCollision(p0, p1);
 
   if (room.kickoffPending) {
@@ -277,7 +285,11 @@ function tickRoom(code, room) {
 
 function triggerGoal(code, room, team) {
   room.score[team]++;
-  io.to(code).emit('goal', { team, score: room.score, names: room.names, goldenGoal: room.goldenGoal });
+  const isOwnGoal   = room.lastTouchTeam !== null && room.lastTouchTeam !== team;
+  const scorerTeam  = isOwnGoal ? room.lastTouchTeam : team;
+  const scorerName  = room.names[scorerTeam] || scorerTeam.toUpperCase();
+  room.lastTouchTeam = null;
+  io.to(code).emit('goal', { team, score: room.score, names: room.names, goldenGoal: room.goldenGoal, isOwnGoal, scorerName });
 
   if (room.goldenGoal) {
     room.phase = 'gameover';

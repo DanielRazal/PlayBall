@@ -87,9 +87,11 @@ function netConnect() {
     }
   });
 
-  socket.on('goal', ({ team, score, names, goldenGoal }) => {
-    const name = names[team] || team.toUpperCase();
-    showGoalNotif(name, score.red, score.blue);
+  socket.on('goal', ({ team, score, names, goldenGoal, isOwnGoal, scorerName }) => {
+    const displayName = isOwnGoal
+      ? scorerName + ' (OG)'
+      : (names[team] || team.toUpperCase());
+    showGoalNotif(displayName, score.red, score.blue);
     if (goldenGoal) setTimeout(() => showGoldenGoalNotif(), 2800);
   });
 

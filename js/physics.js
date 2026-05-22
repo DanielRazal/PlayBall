@@ -16,6 +16,7 @@ function applyKick(p) {
   if ((now - (p.lastKickTime || 0)) < KICK_COOLDOWN) return;
   p.lastKickTime    = now;
   p.kickJustPressed = false;
+  state.lastTouchTeam = p.team;
 
   b.vx += (dx / dist) * KICK_IMPULSE;
   b.vy += (dy / dist) * KICK_IMPULSE;
