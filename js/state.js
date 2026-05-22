@@ -7,7 +7,7 @@ const state = {
   goldenGoal: false,
   kickoffPending: false,
   kickoffTeam: 'red',
-  mode:  '2p',
+  mode:  'ai',
   score: { red: 0, blue: 0 },
   timeLeft:  GAME_DURATION,
   goalTimer: 0,

@@ -58,7 +58,6 @@ function setupInput() {
     state.settings.aiDifficulty = e.target.value;
   });
 
-  document.getElementById('btn-2p').addEventListener('click', () => startGame('2p'));
   document.getElementById('btn-ai').addEventListener('click', () => startGame('ai'));
 
   // Online mode toggle

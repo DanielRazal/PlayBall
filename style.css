@@ -191,12 +191,6 @@ body {
 }
 
 /* Individual colours */
-#btn-2p {
-  background: linear-gradient(160deg, #ff5555 0%, #cc1111 100%);
-  box-shadow: 0 4px 18px rgba(220,40,40,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
-}
-#btn-2p:hover { box-shadow: 0 8px 28px rgba(220,40,40,0.6), inset 0 1px 0 rgba(255,255,255,0.2); }
-
 #btn-ai {
   background: linear-gradient(160deg, #4d9fff 0%, #1144cc 100%);
   box-shadow: 0 4px 18px rgba(40,100,220,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
