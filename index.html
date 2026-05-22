@@ -51,6 +51,17 @@
               </div>
               <span class="setting-sub">goals (0 = unlimited)</span>
             </div>
+            <div class="setting-sep"></div>
+            <div class="setting-group">
+              <label for="setting-extrap">Extrapolation</label>
+              <div class="setting-input-wrap">
+                <button class="setting-btn" data-target="setting-extrap" data-delta="-20" data-min="0" data-max="500">−</button>
+                <span id="setting-extrap-display">200 ms</span>
+                <input id="setting-extrap" type="hidden" value="200">
+                <button class="setting-btn" data-target="setting-extrap" data-delta="20" data-min="0" data-max="500">+</button>
+              </div>
+              <span class="setting-sub">ms online lag comp (0 = off)</span>
+            </div>
           </div>
           <div id="name-row">
             <div class="name-group">

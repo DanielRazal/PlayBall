@@ -14,7 +14,7 @@ const state = {
   lastGoalTeam: null,
   lastTouchTeam: null,
   lastTime: 0,
-  settings: { timeMins: 3, scoreLimit: 3, humanTeam: 'red', aiDifficulty: 'medium', fieldSize: 'medium', theme: 'arsenal' },
+  settings: { timeMins: 3, scoreLimit: 3, humanTeam: 'red', aiDifficulty: 'medium', fieldSize: 'medium', theme: 'arsenal', extrapolation: 200 },
   names: { red: 'Red', blue: 'Blue' },
   playerNumbers: { red: '', blue: '' },
 

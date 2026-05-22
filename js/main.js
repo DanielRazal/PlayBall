@@ -96,6 +96,8 @@ function setupInput() {
     const val   = parseInt(input.value);
     if (inputId === 'setting-time') {
       disp.textContent = val === 0 ? '∞' : `${val}:00`;
+    } else if (inputId === 'setting-extrap') {
+      disp.textContent = val === 0 ? 'OFF' : `${val} ms`;
     } else {
       disp.textContent = val === 0 ? '∞' : val;
     }
@@ -105,8 +107,13 @@ function setupInput() {
     btn.addEventListener('click', () => {
       const input = document.getElementById(btn.dataset.target);
       const delta = parseInt(btn.dataset.delta);
-      input.value = Math.max(0, Math.min(10, parseInt(input.value) + delta));
+      const min   = btn.dataset.min !== undefined ? parseInt(btn.dataset.min) : 0;
+      const max   = btn.dataset.max !== undefined ? parseInt(btn.dataset.max) : 10;
+      input.value = Math.max(min, Math.min(max, parseInt(input.value) + delta));
       updateSettingDisplay(btn.dataset.target);
+      if (btn.dataset.target === 'setting-extrap') {
+        state.settings.extrapolation = parseInt(input.value);
+      }
     });
   });
 }
@@ -200,9 +207,11 @@ function addSystemMessage(text) {
 // ─── Client-side extrapolation (online mode) ─────────────────────────────────
 
 function applyNetExtrapolation() {
-  const snap = state.netSnapshot;
+  const snap  = state.netSnapshot;
   if (!snap) return;
-  const frames = Math.min((performance.now() - snap.t) / (1000 / 60), 20);
+  const maxMs = state.settings.extrapolation || 0;
+  if (maxMs === 0) return;
+  const frames = Math.min((performance.now() - snap.t) / (1000 / 60), maxMs / (1000 / 60));
   if (frames < 0.01) return;
 
   function extrap(pos, vel, friction) {
