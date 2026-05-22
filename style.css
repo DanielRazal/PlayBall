@@ -236,14 +236,18 @@ body {
 #btn-confirm-name:active { transform: scale(0.96); }
 
 #name-display {
-  font-size: 13px;
-  color: rgba(170, 200, 255, 0.85);
+  font-size: 15px;
+  font-weight: 700;
+  color: #aaccff;
   cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: color 0.15s;
+  letter-spacing: 1px;
+  transition: color 0.15s, text-shadow 0.15s;
   margin-top: -4px;
 }
-#name-display:hover { color: #ffffff; }
+#name-display:hover {
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(120, 180, 255, 0.7);
+}
 
 #name-red::placeholder {
   color: #aabbff;
