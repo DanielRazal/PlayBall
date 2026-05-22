@@ -70,7 +70,7 @@ function setupInput() {
 
   document.getElementById('btn-create-room').addEventListener('click', () => {
     const name = document.getElementById('name-red').value || 'Player';
-    const tag  = (document.getElementById('player-number').value.trim() || '7').slice(0, 2);
+    const tag  = document.getElementById('player-number').value.trim().slice(0, 2);
     state.settings.humanTeam = 'red';
     netCreateRoom(state.settings, name, tag);
   });
@@ -78,7 +78,7 @@ function setupInput() {
   document.getElementById('btn-join-room').addEventListener('click', () => {
     const code = document.getElementById('net-join-code').value.trim();
     const name = document.getElementById('name-red').value || 'Player';
-    const tag  = (document.getElementById('player-number').value.trim() || '7').slice(0, 2);
+    const tag  = document.getElementById('player-number').value.trim().slice(0, 2);
     if (!code) return;
     state.settings.humanTeam = 'blue';
     netJoinRoom(code, name, tag);
@@ -87,7 +87,7 @@ function setupInput() {
   document.getElementById('player-number').addEventListener('input', (e) => {
     const tag = e.target.value.slice(0, 2);
     e.target.value = tag;
-    state.playerNumbers[state.settings.humanTeam] = tag || '7';
+    state.playerNumbers[state.settings.humanTeam] = tag;
   });
 
   function updateSettingDisplay(inputId) {

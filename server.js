@@ -70,7 +70,7 @@ function createRoom(settings) {
     goalTimer: 0,
     lastTouchTeam: null,
     names:         { red: 'Red', blue: 'Blue' },
-    playerNumbers: { red: '7', blue: '7' },
+    playerNumbers: { red: '', blue: '' },
     sockets:  { red: null, blue: null },
     ball: { x: cx, y: cy, vx: 0, vy: 0, radius: BALL_R, mass: BALL_M, angle: 0 },
     players: [

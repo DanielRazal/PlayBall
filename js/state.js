@@ -16,7 +16,7 @@ const state = {
   lastTime: 0,
   settings: { timeMins: 3, scoreLimit: 3, humanTeam: 'red', aiDifficulty: 'medium', fieldSize: 'medium', theme: 'arsenal' },
   names: { red: 'Red', blue: 'Blue' },
-  playerNumbers: { red: '7', blue: '7' },
+  playerNumbers: { red: '', blue: '' },
 
   ball: {
     x: 0, y: 0, vx: 0, vy: 0,
