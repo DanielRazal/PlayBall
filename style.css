@@ -235,6 +235,12 @@ body {
 #btn-confirm-name:hover  { filter: brightness(1.15); transform: translateY(-2px); }
 #btn-confirm-name:active { transform: scale(0.96); }
 
+#name-red::placeholder {
+  color: #aabbff;
+  letter-spacing: 1px;
+  font-weight: normal;
+}
+
 #overlay-box.nameentry #name-row {
   max-width: 280px;
   justify-content: center;
