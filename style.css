@@ -242,6 +242,7 @@ body {
   cursor: pointer;
   letter-spacing: 1px;
   transition: color 0.15s;
+  margin-top: 8px;
 }
 #name-display:hover { color: #ffffff; }
 
