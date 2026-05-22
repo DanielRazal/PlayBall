@@ -67,14 +67,14 @@ function setupInput() {
   });
 
   document.getElementById('btn-create-room').addEventListener('click', () => {
-    const name = document.getElementById('name-red').value.trim() || 'Red';
+    const name = document.getElementById('name-red').value.trim() || 'Player';
     state.settings.humanTeam = 'red';
     netCreateRoom(state.settings, name);
   });
 
   document.getElementById('btn-join-room').addEventListener('click', () => {
     const code = document.getElementById('net-join-code').value.trim();
-    const name = document.getElementById('name-blue').value.trim() || 'Blue';
+    const name = document.getElementById('name-red').value.trim() || 'Player';
     if (!code) return;
     state.settings.humanTeam = 'blue';
     netJoinRoom(code, name);

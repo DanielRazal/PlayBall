@@ -72,8 +72,9 @@ function resetPlayers() {
 function startGame(mode) {
   state.settings.timeMins   = parseInt(document.getElementById('setting-time').value)  || 0;
   state.settings.scoreLimit = parseInt(document.getElementById('setting-goals').value) || 0;
-  state.names.red  = document.getElementById('name-red').value.trim()  || 'Red';
-  state.names.blue = document.getElementById('name-blue').value.trim() || 'Blue';
+  const myName = document.getElementById('name-red').value.trim() || 'Player';
+  state.names.red  = state.settings.humanTeam === 'red'  ? myName : 'Blue';
+  state.names.blue = state.settings.humanTeam === 'blue' ? myName : 'Red';
   if (mode === 'ai') {
     const aiTeam = state.settings.humanTeam === 'red' ? 'blue' : 'red';
     state.names[aiTeam] = 'AI';
