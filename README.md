@@ -1,12 +1,14 @@
 # PlayBall
 
+**Live demo:** [https://playball-9414.onrender.com](https://playball-9414.onrender.com)
+
 A real-time multiplayer football game built with Node.js, Express, and Socket.io.
 
 ## Features
 
 - **Real-time multiplayer** — play with friends in the same room over the network
 - **Physics engine** — custom ball & player physics with friction, collisions, and kick impulse
-- **Multiple field sizes** — Small, Medium, and Large
+- **Multiple field sizes** — Tiny, Small, Medium, Large, and Extra Large
 - **Team themes** — choose from 13 club kits (Arsenal, Barcelona, Bayern, Chelsea, Dortmund, Inter, Juventus, Liverpool, Man City, Man Utd, AC Milan, PSG, Real Madrid)
 - **Configurable settings** — adjust match duration and number of goals before starting
 - **60 fps server tick** — authoritative server-side game loop for smooth, cheat-resistant gameplay
