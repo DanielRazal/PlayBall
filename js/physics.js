@@ -106,16 +106,20 @@ function clampPlayerToField(p) {
 }
 
 function applyPlayerInput(p) {
-  const k = p.keys;
-  if (k.up)    p.vy -= PLAYER_ACCEL;
-  if (k.down)  p.vy += PLAYER_ACCEL;
-  if (k.left)  p.vx -= PLAYER_ACCEL;
-  if (k.right) p.vx += PLAYER_ACCEL;
+  const k    = p.keys;
+  const mult = p.isAI ? (AI_LEVELS[state.settings.aiDifficulty]?.speedMult ?? 1) : 1;
+  const accel  = PLAYER_ACCEL * mult;
+  const maxSpd = PLAYER_MAX_SPD * mult;
+
+  if (k.up)    p.vy -= accel;
+  if (k.down)  p.vy += accel;
+  if (k.left)  p.vx -= accel;
+  if (k.right) p.vx += accel;
 
   const spd = Math.hypot(p.vx, p.vy);
-  if (spd > PLAYER_MAX_SPD) {
-    p.vx = (p.vx / spd) * PLAYER_MAX_SPD;
-    p.vy = (p.vy / spd) * PLAYER_MAX_SPD;
+  if (spd > maxSpd) {
+    p.vx = (p.vx / spd) * maxSpd;
+    p.vy = (p.vy / spd) * maxSpd;
   }
 }
 
@@ -197,14 +201,14 @@ function applyAIInput(p) {
       targetX = b.x + clearX * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
     } else {
-      // Position behind ball to shoot toward goal corner
+      // Position behind actual ball (not prediction) to shoot toward goal corner
       const goalX  = p.team === 'blue' ? FIELD.left : FIELD.right;
-      const btgX   = goalX - predBallX;
-      const btgY   = _aiAimY - predBallY;
+      const btgX   = goalX - b.x;
+      const btgY   = _aiAimY - b.y;
       const btgLen = Math.hypot(btgX, btgY) || 1;
       const approach = BALL_R + PLAYER_R + 6;
-      targetX = predBallX - (btgX / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
-      targetY = predBallY - (btgY / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
+      targetX = b.x - (btgX / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
+      targetY = b.y - (btgY / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
     }
   } else {
     targetX = predBallX + (Math.random() - 0.5) * cfg.noise;

@@ -108,6 +108,7 @@ function startGame(mode) {
   state.goldenGoal     = false;
   state.kickoffTeam    = 'red';
   state.kickoffPending = true;
+  state.kickoffFrames  = 0;
   state.phase          = 'playing';
   resetBall();
   resetPlayers();
@@ -132,6 +133,8 @@ function updatePhysics() {
     clampPlayerToField(p);
 
     if (state.kickoffPending) {
+      state.kickoffFrames = (state.kickoffFrames || 0) + 1;
+      if (state.kickoffFrames > 150) { state.kickoffPending = false; state.kickoffFrames = 0; }
       const CIRCLE_R = 80;
       const cdx = p.x - FIELD.centerX, cdy = p.y - FIELD.centerY;
       const cdist = Math.hypot(cdx, cdy);
@@ -244,6 +247,7 @@ function triggerGoal(team) {
 
   state.kickoffTeam    = team === 'red' ? 'blue' : 'red';
   state.kickoffPending = true;
+  state.kickoffFrames  = 0;
   resetBall();
   resetPlayers();
 }
