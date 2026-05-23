@@ -126,10 +126,10 @@ function applyPlayerInput(p) {
 // ─── AI ───────────────────────────────────────────────────────────────────────
 
 const AI_LEVELS = {
-  //        frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset
-  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 70 },
-  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65 },
-  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 55 },
+  //        frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius
+  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 70, pressRadius: 28 },
+  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65, pressRadius: 45 },
+  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 55, pressRadius: 65 },
 };
 
 // Simulate ball position accounting for wall bounces and friction
@@ -207,7 +207,10 @@ function applyAIInput(p) {
   const ballMovingAway    = (p.team === 'blue' ? b.vx < -1  : b.vx > 1)   && ballSpeed > 2;
   const ballThreat        = ballInOwnHalf && ballRushingToGoal;
   const humanDistToBall   = humanP ? Math.hypot(humanP.x - b.x, humanP.y - b.y) : Infinity;
-  const shouldPress       = humanDistToBall < PLAYER_R * 3.5;
+  const shouldPress       = humanDistToBall < cfg.pressRadius;
+  const goalMouthDist     = p.team === 'blue' ? FIELD.right - b.x : b.x - FIELD.left;
+  const inGoalVertical    = b.y > GOAL_TOP() - PLAYER_R && b.y < GOAL_BOT() + PLAYER_R;
+  const goalieSituation   = goalMouthDist < 110 && inGoalVertical && ballDist >= cfg.posRadius;
 
   let targetX, targetY;
 
@@ -218,13 +221,25 @@ function applyAIInput(p) {
       targetX = b.x + sign * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
     } else {
-      // SHOOT — position behind actual ball toward goal corner
-      const btgX   = oppGoalX - b.x;
-      const btgY   = _aiAimY  - b.y;
-      const btgLen = Math.hypot(btgX, btgY) || 1;
-      targetX = b.x - (btgX / btgLen) * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
-      targetY = b.y - (btgY / btgLen) * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
+      // SHOOT — approach ball from correct side before kicking
+      const wrongSide = p.team === 'blue' ? p.x < b.x - PLAYER_R : p.x > b.x + PLAYER_R;
+      if (wrongSide) {
+        // Detour: get behind ball diagonally to avoid pushing it the wrong way
+        const sideOff = (p.y < b.y ? 1 : -1) * (BALL_R + PLAYER_R + 8);
+        targetX = b.x + sign * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
+        targetY = b.y + sideOff + (Math.random() - 0.5) * cfg.noise;
+      } else {
+        const btgX   = oppGoalX - b.x;
+        const btgY   = _aiAimY  - b.y;
+        const btgLen = Math.hypot(btgX, btgY) || 1;
+        targetX = b.x - (btgX / btgLen) * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
+        targetY = b.y - (btgY / btgLen) * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
+      }
     }
+  } else if (goalieSituation) {
+    // GOALIE — stand in goal mouth and track ball's Y to block shots
+    targetX = ownGoalX - sign * (PLAYER_R + 6);
+    targetY = Math.max(GOAL_TOP() + PLAYER_R, Math.min(GOAL_BOT() - PLAYER_R, b.y));
   } else if (ballThreat) {
     // EMERGENCY — rush to intercept ball heading for own goal
     targetX = predBallX + (Math.random() - 0.5) * cfg.noise * 0.5;
@@ -242,8 +257,8 @@ function applyAIInput(p) {
     targetX = b.x + (toGoalX / toGoalLen) * coverDist + (Math.random() - 0.5) * cfg.noise;
     targetY = b.y + (toGoalY / toGoalLen) * coverDist + (Math.random() - 0.5) * cfg.noise;
   } else {
-    // ATTACK / FOLLOW-UP — chase predicted ball
-    targetX = predBallX + (Math.random() - 0.5) * cfg.noise;
+    // ATTACK / FOLLOW-UP — run to shooting position behind predicted ball
+    targetX = predBallX + sign * (BALL_R + PLAYER_R) + (Math.random() - 0.5) * cfg.noise;
     targetY = predBallY + (Math.random() - 0.5) * cfg.noise;
   }
 
