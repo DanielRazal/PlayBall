@@ -126,10 +126,10 @@ function applyPlayerInput(p) {
 // ─── AI ───────────────────────────────────────────────────────────────────────
 
 const AI_LEVELS = {
-  //                  frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset
-  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18 },
-  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42 },
-  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62 },
+  //        frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset
+  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 70 },
+  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65 },
+  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 55 },
 };
 
 // Simulate ball position accounting for wall bounces and friction
@@ -156,11 +156,14 @@ function applyAIInput(p) {
   const b   = state.ball;
   const k   = p.keys;
 
-  // Refresh aim target
-  if (++_aiAimTimer >= 30) {
+  const ownGoalX = p.team === 'blue' ? FIELD.right : FIELD.left;
+  const oppGoalX = p.team === 'blue' ? FIELD.left  : FIELD.right;
+  const sign     = p.team === 'blue' ? 1 : -1;  // direction toward own goal
+
+  // Refresh aim: Hard tracks human every 12 frames, others every 25-40
+  if (++_aiAimTimer >= cfg.aimRefresh) {
     _aiAimTimer = 0;
     if (cfg.noise === 0) {
-      // Hard: aim at corner furthest from human player
       const humanP = state.players.find(pl => pl.team === state.settings.humanTeam);
       const humanY = humanP ? humanP.y : FIELD.centerY;
       const topCorner = GOAL_TOP() + 18;
@@ -179,43 +182,54 @@ function applyAIInput(p) {
 
   k.up = k.down = k.left = k.right = false;
 
-  // Predict ball position — medium/hard use bounce-aware simulation, easy uses linear
+  // Predict ball position
   const pred = cfg.noise === 0
     ? _predictBall(b, cfg.predictFrames)
     : { x: b.x + b.vx * cfg.predictFrames, y: b.y + b.vy * cfg.predictFrames };
-  const predBallX = Math.max(FIELD.left  + BALL_R, Math.min(FIELD.right  - BALL_R, pred.x));
-  const predBallY = Math.max(FIELD.top   + BALL_R, Math.min(FIELD.bottom - BALL_R, pred.y));
+  const predBallX = Math.max(FIELD.left+BALL_R, Math.min(FIELD.right-BALL_R, pred.x));
+  const predBallY = Math.max(FIELD.top+BALL_R,  Math.min(FIELD.bottom-BALL_R, pred.y));
 
-  const ballDist = Math.hypot(b.x - p.x, b.y - p.y);
-  let   targetX, targetY;
+  const ballDist  = Math.hypot(b.x - p.x, b.y - p.y);
+  const ballSpeed = Math.hypot(b.vx, b.vy);
 
-  const dangerZone = p.team === 'blue'
-    ? b.x > FIELD.right - 170
-    : b.x < FIELD.left  + 170;
+  // Situational flags
+  const dangerZone    = p.team === 'blue' ? b.x > FIELD.right - 170 : b.x < FIELD.left + 170;
+  const ballInOwnHalf = p.team === 'blue' ? b.x > FIELD.centerX     : b.x < FIELD.centerX;
+  const ballRushingToGoal = (p.team === 'blue' ? b.vx > 1.5 : b.vx < -1.5) && ballSpeed > 2.5;
+  const ballThreat    = ballInOwnHalf && ballRushingToGoal;
+
+  let targetX, targetY;
 
   if (ballDist < cfg.posRadius) {
     if (dangerZone) {
-      // Position between ball and own goal, then kick away
-      const clearX = p.team === 'blue' ? 1 : -1;   // blue own goal = right → stand RIGHT of ball
+      // CLEAR — stand between ball and own goal, kick it away
       const clearY = b.y > FIELD.centerY ? -1 : 1;
-      targetX = b.x + clearX * (BALL_R + PLAYER_R + 6);
+      targetX = b.x + sign * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
     } else {
-      // Position behind actual ball (not prediction) to shoot toward goal corner
-      const goalX  = p.team === 'blue' ? FIELD.left : FIELD.right;
-      const btgX   = goalX - b.x;
+      // SHOOT — position behind actual ball toward opponent goal corner
+      const btgX   = oppGoalX - b.x;
       const btgY   = _aiAimY - b.y;
       const btgLen = Math.hypot(btgX, btgY) || 1;
       const approach = BALL_R + PLAYER_R + 6;
       targetX = b.x - (btgX / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
       targetY = b.y - (btgY / btgLen) * approach + (Math.random() - 0.5) * cfg.noise;
     }
+  } else if (ballThreat) {
+    // EMERGENCY — rush directly to intercept threatening ball
+    targetX = predBallX + (Math.random() - 0.5) * cfg.noise * 0.5;
+    targetY = predBallY + (Math.random() - 0.5) * cfg.noise * 0.5;
+  } else if (ballInOwnHalf) {
+    // DEFEND — stay between ball and own goal, shadow ball's Y
+    targetX = b.x + sign * cfg.defendOffset + (Math.random() - 0.5) * cfg.noise;
+    targetY = b.y + (Math.random() - 0.5) * cfg.noise;
   } else {
+    // ATTACK — chase predicted ball position
     targetX = predBallX + (Math.random() - 0.5) * cfg.noise;
     targetY = predBallY + (Math.random() - 0.5) * cfg.noise;
   }
 
-  targetX = Math.max(FIELD.left + PLAYER_R, Math.min(FIELD.right  - PLAYER_R, targetX));
+  targetX = Math.max(FIELD.left + PLAYER_R, Math.min(FIELD.right - PLAYER_R, targetX));
   targetY = Math.max(FIELD.top  + PLAYER_R, Math.min(FIELD.bottom - PLAYER_R, targetY));
 
   const dx        = targetX - p.x;
@@ -227,25 +241,23 @@ function applyAIInput(p) {
   k.down  = dy >  threshold;
   k.up    = dy < -threshold;
 
-  // Kick: check both safety (away from own goal) and alignment toward opponent's goal
+  // Kick logic
   if (ballDist < KICK_RANGE) {
     const kickDirX = b.x - p.x;
     const kickDirY = b.y - p.y;
-    const oppGoalX = p.team === 'blue' ? FIELD.left  : FIELD.right;
-    const ownGoalX = p.team === 'blue' ? FIELD.right : FIELD.left;
     const toGoalX  = oppGoalX - b.x;
     const toGoalY  = _aiAimY  - b.y;
     const dot      = kickDirX * toGoalX + kickDirY * toGoalY;
     const mag      = (Math.hypot(kickDirX, kickDirY) || 1) * (Math.hypot(toGoalX, toGoalY) || 1);
-    const aligned  = dot / mag > 0.4;  // within ~66° of goal
+    const aligned  = dot / mag > 0.4;
     const safeKick = (ownGoalX - b.x) * kickDirX < 0;
 
     if (cfg.predictFrames <= 6) {
-      k.kick = true;                                            // easy: always kick
+      k.kick = true;
     } else if (cfg.noise > 0) {
-      k.kick = dangerZone ? safeKick : (safeKick && aligned) || Math.random() > 0.80;  // medium
+      k.kick = dangerZone ? safeKick : (safeKick && aligned) || Math.random() > 0.80;
     } else {
-      k.kick = dangerZone ? safeKick : (safeKick && aligned);  // hard: clear in danger, aim elsewhere
+      k.kick = dangerZone ? safeKick : (safeKick && aligned);
     }
   } else {
     k.kick = false;
