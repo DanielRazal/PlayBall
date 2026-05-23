@@ -191,8 +191,8 @@ function applyAIInput(p) {
 
   if (ballDist < cfg.posRadius) {
     if (dangerZone) {
-      // Clear ball sideways away from own goal
-      const clearX = p.team === 'blue' ? -1 : 1;
+      // Position between ball and own goal, then kick away
+      const clearX = p.team === 'blue' ? 1 : -1;   // blue own goal = right → stand RIGHT of ball
       const clearY = b.y > FIELD.centerY ? -1 : 1;
       targetX = b.x + clearX * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
@@ -237,11 +237,11 @@ function applyAIInput(p) {
     const safeKick = (ownGoalX - b.x) * kickDirX < 0;
 
     if (cfg.predictFrames <= 6) {
-      k.kick = true;                                       // easy: always kick
+      k.kick = true;                                            // easy: always kick
     } else if (cfg.noise > 0) {
-      k.kick = (safeKick && aligned) || Math.random() > 0.80;  // medium
+      k.kick = dangerZone ? safeKick : (safeKick && aligned) || Math.random() > 0.80;  // medium
     } else {
-      k.kick = safeKick && aligned;                        // hard: only well-aimed kicks
+      k.kick = dangerZone ? safeKick : (safeKick && aligned);  // hard: clear in danger, aim elsewhere
     }
   } else {
     k.kick = false;
