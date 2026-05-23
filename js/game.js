@@ -134,7 +134,8 @@ function updatePhysics() {
 
     if (state.kickoffPending) {
       state.kickoffFrames = (state.kickoffFrames || 0) + 1;
-      if (state.kickoffFrames > 150) { state.kickoffPending = false; state.kickoffFrames = 0; }
+      const _koPlayer = state.players.find(pl => pl.team === state.kickoffTeam);
+      if (state.kickoffFrames > 150 && _koPlayer && _koPlayer.isAI) { state.kickoffPending = false; state.kickoffFrames = 0; }
       const CIRCLE_R = 80;
       const cdx = p.x - FIELD.centerX, cdy = p.y - FIELD.centerY;
       const cdist = Math.hypot(cdx, cdy);
