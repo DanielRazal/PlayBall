@@ -290,7 +290,8 @@ function setOverlayMode(mode) {
   const isNameEntry = mode === 'nameentry';
   elBtnRow().style.display      = mode === 'menu' ? 'flex' : 'none';
   elPauseBtnRow().style.display = mode === 'pause' || mode === 'gameover' ? 'flex' : 'none';
-  document.getElementById('btn-resume').style.display = mode === 'gameover' ? 'none' : '';
+  document.getElementById('btn-resume').style.display  = mode === 'gameover' ? 'none' : '';
+  document.getElementById('btn-restart').style.display = (mode === 'gameover' && state.mode === 'ai') ? 'none' : '';
   const menuOnly = mode === 'menu' ? 'flex' : 'none';
   document.getElementById('name-row').style.display      = isNameEntry ? 'flex' : 'none';
   document.getElementById('settings-row').style.display  = menuOnly;
@@ -335,7 +336,7 @@ function showGameOver() {
   else if (blue > red) result = `${bName} wins!`;
   else                 result = 'Draw!';
   document.getElementById('overlay-score').textContent = `${red} - ${blue}`;
-  elTitle().textContent = result.toUpperCase();
+  setOverlayTitle(result.toUpperCase());
   elMsg().textContent   = '';
   setOverlayMode('gameover');
 }
