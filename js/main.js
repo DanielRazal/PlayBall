@@ -25,10 +25,12 @@ function setupInput() {
     if (m) {
       if (isOnline()) {
         const myP = state.players.find(p => p.team === getMyTeam());
-        if (myP) myP.keys[m.a] = true;
+        if (myP) { myP.keys[m.a] = true; if (m.a === 'kick') myP.kickBuffer = performance.now(); }
       } else {
         const idx = resolvePlayerIdx(m.p);
-        state.players[idx].keys[m.a] = true;
+        const p = state.players[idx];
+        p.keys[m.a] = true;
+        if (m.a === 'kick') p.kickBuffer = performance.now();
       }
     }
   });
@@ -314,10 +316,12 @@ function setupTouchControls() {
   function setKey(action, val) {
     if (isOnline()) {
       const myP = state.players.find(p => p.team === getMyTeam());
-      if (myP) myP.keys[action] = val;
+      if (myP) { myP.keys[action] = val; if (action === 'kick' && val) myP.kickBuffer = performance.now(); }
     } else {
       const idx = state.players[0].isAI ? 1 : 0;
-      state.players[idx].keys[action] = val;
+      const p = state.players[idx];
+      p.keys[action] = val;
+      if (action === 'kick' && val) p.kickBuffer = performance.now();
     }
   }
 

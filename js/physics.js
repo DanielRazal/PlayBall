@@ -3,10 +3,11 @@
 // ─── Player input ─────────────────────────────────────────────────────────────
 
 function applyKick(p) {
-  if (!p.keys.kick) { p.kickJustPressed = false; return; }
+  const now = performance.now();
+  const bufferFresh = (now - (p.kickBuffer || 0)) < 200;
+  if (!p.keys.kick && !bufferFresh) return;
   if (state.kickoffPending && p.team !== state.kickoffTeam) return;
 
-  const now  = performance.now();
   const b    = state.ball;
   const dx   = b.x - p.x;
   const dy   = b.y - p.y;
@@ -14,8 +15,8 @@ function applyKick(p) {
 
   if (dist > KICK_RANGE) return;
   if ((now - (p.lastKickTime || 0)) < KICK_COOLDOWN) return;
-  p.lastKickTime    = now;
-  p.kickJustPressed = false;
+  p.lastKickTime = now;
+  p.kickBuffer   = 0;
   state.lastTouchTeam = p.team;
 
   b.vx += (dx / dist) * KICK_IMPULSE;

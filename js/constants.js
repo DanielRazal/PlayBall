@@ -40,11 +40,11 @@ const BALL_M   = 1.0;
 
 const FRICTION_BALL          = 0.986;  // was 0.99 — ball decelerates faster for control
 const FRICTION_PLAYER        = 0.78;  // was 0.96 — stops fast, feels grippy like haxball
-const RESTITUTION_DEFAULT    = 0.5;    // wall bounces
+const RESTITUTION_DEFAULT    = 0.65;   // wall bounces — was 0.5, higher for rockets
 const RESTITUTION_PLAYER_BALL = 0.08; // soft touch — ball stays on foot, haxball-like dribble
 const PLAYER_ACCEL           = 0.55;  // was 0.15 — responsive acceleration to compensate
 const PLAYER_MAX_SPD         = 4.2;   // was 5.0 — slightly slower top speed
-const KICK_IMPULSE           = 4;     // was 6 — lighter kick, more dribble control
+const KICK_IMPULSE           = 5;     // was 4 — enough power for wall rockets
 const KICK_RANGE             = PLAYER_R + BALL_R + 12;
 const KICK_COOLDOWN          = 80;    // was 120 — faster taps for dribbling
 const BALL_MAX_SPD           = 22;    // was 30 — cap max speed for controllable feel
