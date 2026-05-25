@@ -184,8 +184,12 @@ function applyAIInput(p) {
     const botCorner  = GOAL_BOT() - 18;
     const openCorner = Math.abs(humanY - topCorner) > Math.abs(humanY - botCorner) ? topCorner : botCorner;
     if (cfg.noise === 0) {
-      // Hard: aim open corner precisely, 30% wall-bounce
-      _aiAimY = Math.random() < 0.30
+      // Hard: wall-bounce when human blocks direct lane, otherwise direct
+      const humanBlocksDirect = humanP &&
+        Math.abs(humanP.y - openCorner) < 45 &&
+        (p.team === 'blue' ? humanP.x > b.x - 90 : humanP.x < b.x + 90);
+      const wallBounceChance = humanBlocksDirect ? 0.65 : 0.20;
+      _aiAimY = Math.random() < wallBounceChance
         ? (openCorner < FIELD.centerY ? 2 * FIELD.top - openCorner : 2 * FIELD.bottom - openCorner)
         : openCorner;
     } else if (cfg.noise <= 10) {
@@ -238,6 +242,12 @@ function applyAIInput(p) {
       const clearY = b.y > FIELD.centerY ? -1 : 1;
       targetX = b.x + sign * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
+    } else if (humanP && humanDistToBall < 50 && cfg.noise <= 10) {
+      // SHIELD — place body between human and ball; hold position until clear to shoot
+      const awayX = b.x - humanP.x, awayY = b.y - humanP.y;
+      const awayLen = Math.hypot(awayX, awayY) || 1;
+      targetX = b.x + (awayX / awayLen) * (BALL_R + PLAYER_R + 4);
+      targetY = b.y + (awayY / awayLen) * (BALL_R + PLAYER_R + 4);
     } else {
       // SHOOT — approach from correct side, then aim at goal corner
       const wrongSide = p.team === 'blue' ? p.x < b.x - PLAYER_R : p.x > b.x + PLAYER_R;
@@ -277,10 +287,11 @@ function applyAIInput(p) {
       targetY = b.y - (ptgY / ptgLen) * (BALL_R + PLAYER_R + 5) + (Math.random() - 0.5) * cfg.noise;
     }
   } else if (ballInOwnHalf && !ballMovingAway) {
-    // DEFEND — cover shooting angle along ball→goal vector at ~55% depth
+    // DEFEND — retreat deeper when ball arrives faster (urgency scales with speed)
     const toGoalX = ownGoalX - b.x, toGoalY = FIELD.centerY - b.y;
     const toGoalLen = Math.hypot(toGoalX, toGoalY) || 1;
-    const coverDist = Math.min(toGoalLen * 0.55, cfg.defendOffset);
+    const urgency   = Math.min(1.5, 1 + ballSpeed * 0.12);
+    const coverDist = Math.min(toGoalLen * 0.55 * urgency, cfg.defendOffset * urgency);
     targetX = b.x + (toGoalX / toGoalLen) * coverDist + (Math.random() - 0.5) * cfg.noise;
     targetY = b.y + (toGoalY / toGoalLen) * coverDist + (Math.random() - 0.5) * cfg.noise;
   } else {
