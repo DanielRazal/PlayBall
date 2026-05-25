@@ -292,21 +292,9 @@ function applyNetExtrapolation() {
 }
 
 // ─── Mobile scaling ──────────────────────────────────────────────────────────
-
-function applyMobileScale() {
-  const W = 804;
-  const vw = window.innerWidth;
-  const el = document.getElementById('container');
-  if (vw < W) {
-    const scale = vw / W;
-    el.style.transform = `scale(${scale})`;
-    el.style.transformOrigin = 'top center';
-    el.style.marginBottom = `${-(el.offsetHeight * (1 - scale))}px`;
-  } else {
-    el.style.transform = '';
-    el.style.marginBottom = '';
-  }
-}
+// Handled via CSS: min(800px, 100vw) + aspect-ratio on #canvas-wrap.
+// No JS transform needed — that would break position:fixed on the overlay.
+function applyMobileScale() {}
 
 // ─── Touch controls ───────────────────────────────────────────────────────────
 
