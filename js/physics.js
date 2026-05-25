@@ -126,10 +126,10 @@ function applyPlayerInput(p) {
 // ─── AI ───────────────────────────────────────────────────────────────────────
 
 const AI_LEVELS = {
-  //              frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius  interceptFrames
-  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 70, pressRadius: 28, interceptFrames: 0  },
-  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65, pressRadius: 45, interceptFrames: 35 },
-  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 55, pressRadius: 65, interceptFrames: 90 },
+  //              frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius  interceptFrames  interceptTol  goalieRange  dangerDepth  shieldRange  threatSpeed  threatVx
+  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 55, pressRadius: 35, interceptFrames: 0,  interceptTol: 1.30, goalieRange: 90,  dangerDepth: 130, shieldRange: 0,  threatSpeed: 3.0, threatVx: 2.0 },
+  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65, pressRadius: 45, interceptFrames: 35, interceptTol: 1.35, goalieRange: 110, dangerDepth: 160, shieldRange: 45, threatSpeed: 2.5, threatVx: 1.5 },
+  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 85, pressRadius: 65, interceptFrames: 90, interceptTol: 1.10, goalieRange: 140, dangerDepth: 200, shieldRange: 55, threatSpeed: 1.5, threatVx: 1.0 },
 };
 
 // Simulate ball with wall bounces and actual physics constants
@@ -147,8 +147,9 @@ function _predictBall(b, frames) {
   return { x, y };
 }
 
-// Find the earliest point on ball's trajectory the AI can physically reach
-function _findIntercept(b, fromX, fromY, aiMaxSpd) {
+// Find the earliest point on ball's trajectory the AI can physically reach.
+// tol > 1 means optimistic (Medium); tol closer to 1 means precise (Hard).
+function _findIntercept(b, fromX, fromY, aiMaxSpd, tol) {
   let bx = b.x, by = b.y, bvx = b.vx, bvy = b.vy;
   for (let t = 1; t <= 90; t++) {
     bx += bvx; by += bvy;
@@ -157,7 +158,7 @@ function _findIntercept(b, fromX, fromY, aiMaxSpd) {
     if (by >= FIELD.bottom - BALL_R) { by = FIELD.bottom - BALL_R; bvy = -Math.abs(bvy) * RESTITUTION_DEFAULT; }
     if (bx <= FIELD.left   + BALL_R) { bx = FIELD.left   + BALL_R; bvx =  Math.abs(bvx) * RESTITUTION_DEFAULT; }
     if (bx >= FIELD.right  - BALL_R) { bx = FIELD.right  - BALL_R; bvx = -Math.abs(bvx) * RESTITUTION_DEFAULT; }
-    if (Math.hypot(bx - fromX, by - fromY) <= aiMaxSpd * t * 1.3) return { x: bx, y: by };
+    if (Math.hypot(bx - fromX, by - fromY) <= aiMaxSpd * t * tol) return { x: bx, y: by };
   }
   return { x: bx, y: by };
 }
@@ -211,7 +212,7 @@ function applyAIInput(p) {
 
   // ── Prediction & intercept ────────────────────────────────────────────────────
   const aiMaxSpd  = PLAYER_MAX_SPD * cfg.speedMult;
-  const intercept = cfg.interceptFrames > 0 ? _findIntercept(b, p.x, p.y, aiMaxSpd) : null;
+  const intercept = cfg.interceptFrames > 0 ? _findIntercept(b, p.x, p.y, aiMaxSpd, cfg.interceptTol) : null;
 
   const pred      = cfg.noise === 0
     ? _predictBall(b, cfg.predictFrames)
@@ -223,16 +224,16 @@ function applyAIInput(p) {
   const ballSpeed = Math.hypot(b.vx, b.vy);
 
   // ── Situation flags ───────────────────────────────────────────────────────────
-  const dangerZone        = p.team === 'blue' ? b.x > FIELD.right - 170 : b.x < FIELD.left + 170;
-  const ballInOwnHalf     = p.team === 'blue' ? b.x > FIELD.centerX     : b.x < FIELD.centerX;
-  const ballRushingToGoal = (p.team === 'blue' ? b.vx > 1.5 : b.vx < -1.5) && ballSpeed > 2.5;
-  const ballMovingAway    = (p.team === 'blue' ? b.vx < -1  : b.vx > 1)   && ballSpeed > 2;
+  const dangerZone        = p.team === 'blue' ? b.x > FIELD.right - cfg.dangerDepth : b.x < FIELD.left + cfg.dangerDepth;
+  const ballInOwnHalf     = p.team === 'blue' ? b.x > FIELD.centerX                : b.x < FIELD.centerX;
+  const ballRushingToGoal = (p.team === 'blue' ? b.vx > cfg.threatVx : b.vx < -cfg.threatVx) && ballSpeed > cfg.threatSpeed;
+  const ballMovingAway    = (p.team === 'blue' ? b.vx < -1  : b.vx > 1) && ballSpeed > 2;
   const ballThreat        = ballInOwnHalf && ballRushingToGoal;
   const humanDistToBall   = humanP ? Math.hypot(humanP.x - b.x, humanP.y - b.y) : Infinity;
   const shouldPress       = humanDistToBall < cfg.pressRadius;
   const goalMouthDist     = p.team === 'blue' ? FIELD.right - b.x : b.x - FIELD.left;
   const inGoalVertical    = b.y > GOAL_TOP() - PLAYER_R && b.y < GOAL_BOT() + PLAYER_R;
-  const goalieSituation   = goalMouthDist < 110 && inGoalVertical && ballDist >= cfg.posRadius;
+  const goalieSituation   = goalMouthDist < cfg.goalieRange && inGoalVertical && ballDist >= cfg.posRadius;
 
   let targetX, targetY;
 
@@ -242,7 +243,7 @@ function applyAIInput(p) {
       const clearY = b.y > FIELD.centerY ? -1 : 1;
       targetX = b.x + sign * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
-    } else if (humanP && humanDistToBall < 50 && cfg.noise <= 10) {
+    } else if (humanP && cfg.shieldRange > 0 && humanDistToBall < cfg.shieldRange) {
       // SHIELD — place body between human and ball; hold position until clear to shoot
       const awayX = b.x - humanP.x, awayY = b.y - humanP.y;
       const awayLen = Math.hypot(awayX, awayY) || 1;
