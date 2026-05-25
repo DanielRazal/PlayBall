@@ -127,8 +127,11 @@ function applyPlayerInput(p) {
 
 const AI_LEVELS = {
   //              frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius  interceptFrames  interceptTol  goalieRange  dangerDepth  shieldRange  threatSpeed  threatVx
-  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 55, pressRadius: 35, interceptFrames: 0,  interceptTol: 1.30, goalieRange: 90,  dangerDepth: 130, shieldRange: 0,  threatSpeed: 3.0, threatVx: 2.0 },
-  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65, pressRadius: 45, interceptFrames: 35, interceptTol: 1.35, goalieRange: 110, dangerDepth: 160, shieldRange: 45, threatSpeed: 2.5, threatVx: 1.5 },
+  // Easy: half human speed, no goalie/emergency/press, poor aim (sometimes misses goal)
+  easy:   { frameSkip: 8, speedMult: 0.50, posRadius: 150, noise: 60, predictFrames: 0,  aimOffset: 75, aimRefresh: 60, defendOffset: 25, pressRadius: 0,  interceptFrames: 0,  interceptTol: 1.30, goalieRange: 0,   dangerDepth: 70,  shieldRange: 0,  threatSpeed: 99,  threatVx: 99  },
+  // Medium: noticeably slower than human, some imprecision, full behavior tree
+  medium: { frameSkip: 4, speedMult: 0.78, posRadius: 90,  noise: 18, predictFrames: 22, aimOffset: 42, aimRefresh: 28, defendOffset: 60, pressRadius: 42, interceptFrames: 30, interceptTol: 1.35, goalieRange: 100, dangerDepth: 150, shieldRange: 42, threatSpeed: 2.5, threatVx: 1.5 },
+  // Hard: 10% faster than human, perfect aim, full anticipation
   hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 85, pressRadius: 65, interceptFrames: 90, interceptTol: 1.10, goalieRange: 140, dangerDepth: 200, shieldRange: 55, threatSpeed: 1.5, threatVx: 1.0 },
 };
 
