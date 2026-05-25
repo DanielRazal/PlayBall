@@ -127,12 +127,12 @@ function applyPlayerInput(p) {
 
 const AI_LEVELS = {
   //              frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius  interceptFrames  interceptTol  goalieRange  dangerDepth  shieldRange  threatSpeed  threatVx
-  // Easy: half human speed, no goalie/emergency/press, poor aim (sometimes misses goal)
-  easy:   { frameSkip: 8, speedMult: 0.50, posRadius: 150, noise: 60, predictFrames: 0,  aimOffset: 75, aimRefresh: 60, defendOffset: 25, pressRadius: 0,  interceptFrames: 0,  interceptTol: 1.30, goalieRange: 0,   dangerDepth: 70,  shieldRange: 0,  threatSpeed: 99,  threatVx: 99  },
-  // Medium: noticeably slower than human, some imprecision, full behavior tree
-  medium: { frameSkip: 4, speedMult: 0.78, posRadius: 90,  noise: 18, predictFrames: 22, aimOffset: 42, aimRefresh: 28, defendOffset: 60, pressRadius: 42, interceptFrames: 30, interceptTol: 1.35, goalieRange: 100, dangerDepth: 150, shieldRange: 42, threatSpeed: 2.5, threatVx: 1.5 },
-  // Hard: 10% faster than human, perfect aim, full anticipation
-  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 85, pressRadius: 65, interceptFrames: 90, interceptTol: 1.10, goalieRange: 140, dangerDepth: 200, shieldRange: 55, threatSpeed: 1.5, threatVx: 1.0 },
+  // Easy: same speed as human, no goalie/emergency/press, poor aim (sometimes misses goal)
+  easy:   { frameSkip: 8, speedMult: 1.00, posRadius: 150, noise: 60, predictFrames: 0,  aimOffset: 75, aimRefresh: 60, defendOffset: 25, pressRadius: 0,  interceptFrames: 0,  interceptTol: 1.30, goalieRange: 0,   dangerDepth: 70,  shieldRange: 0,  threatSpeed: 99,  threatVx: 99  },
+  // Medium: same speed as human, some imprecision, full behavior tree
+  medium: { frameSkip: 4, speedMult: 1.00, posRadius: 90,  noise: 18, predictFrames: 22, aimOffset: 42, aimRefresh: 28, defendOffset: 60, pressRadius: 42, interceptFrames: 30, interceptTol: 1.35, goalieRange: 100, dangerDepth: 150, shieldRange: 42, threatSpeed: 2.5, threatVx: 1.5 },
+  // Hard: same speed as human, perfect aim, full anticipation
+  hard:   { frameSkip: 1, speedMult: 1.00, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 85, pressRadius: 65, interceptFrames: 90, interceptTol: 1.10, goalieRange: 140, dangerDepth: 200, shieldRange: 55, threatSpeed: 1.5, threatVx: 1.0 },
 };
 
 // Simulate ball with wall bounces and actual physics constants
