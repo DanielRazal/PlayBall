@@ -189,11 +189,11 @@ function updatePhysics() {
   applyKick(p1);
   if (!state.kickoffPending || p0.team === state.kickoffTeam) {
     if (Math.hypot(b.x - p0.x, b.y - p0.y) < p0.radius + b.radius + 1) state.lastTouchTeam = p0.team;
-    resolveCircleCollision(p0, b);
+    resolveCircleCollision(p0, b, RESTITUTION_PLAYER_BALL);
   }
   if (!state.kickoffPending || p1.team === state.kickoffTeam) {
     if (Math.hypot(b.x - p1.x, b.y - p1.y) < p1.radius + b.radius + 1) state.lastTouchTeam = p1.team;
-    resolveCircleCollision(p1, b);
+    resolveCircleCollision(p1, b, RESTITUTION_PLAYER_BALL);
   }
   resolveCircleCollision(p0, p1);
 

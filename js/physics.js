@@ -32,7 +32,7 @@ function applyKick(p) {
 
 // ─── Collision resolution ─────────────────────────────────────────────────────
 
-function resolveCircleCollision(a, b) {
+function resolveCircleCollision(a, b, restitution = RESTITUTION_DEFAULT) {
   const dx   = b.x - a.x;
   const dy   = b.y - a.y;
   const dist = Math.hypot(dx, dy);
@@ -57,7 +57,7 @@ function resolveCircleCollision(a, b) {
     return;
   }
 
-  const impulse = -(1 + RESTITUTION_DEFAULT) * dot / (1 / a.mass + 1 / b.mass);
+  const impulse = -(1 + restitution) * dot / (1 / a.mass + 1 / b.mass);
 
   a.vx -= (impulse / a.mass) * nx;
   a.vy -= (impulse / a.mass) * ny;
