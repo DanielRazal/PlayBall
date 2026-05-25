@@ -380,7 +380,7 @@ body {
 .name-group-num input { text-align: center; }
 .name-group-num input::-webkit-outer-spin-button,
 .name-group-num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.name-group-num input[type=number] { -moz-appearance: textfield; }
+.name-group-num input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 #dropdowns-row {
   display: flex;
@@ -569,7 +569,7 @@ body {
 .setting-extrap-input:focus { border-color: rgba(100,150,255,0.6); }
 .setting-extrap-input::-webkit-outer-spin-button,
 .setting-extrap-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.setting-extrap-input[type=number] { -moz-appearance: textfield; }
+.setting-extrap-input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 .setting-sub {
   font-size: 11px;
