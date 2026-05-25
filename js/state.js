@@ -73,4 +73,19 @@ const elTimer     = () => document.getElementById('timer');
 const elOverlay   = () => document.getElementById('overlay');
 const elTitle     = () => document.getElementById('overlay-title');
 const elMsg       = () => document.getElementById('overlay-msg');
+
+function setOverlayTitle(text) {
+  const el = elTitle();
+  const maxSize = window.innerWidth <= 600 ? 34 : 52;
+  el.textContent = text;
+  requestAnimationFrame(() => {
+    const maxWidth = elOverlay().clientWidth * 0.9;
+    let size = maxSize;
+    el.style.fontSize = size + 'px';
+    while (el.scrollWidth > maxWidth && size > 14) {
+      size -= 1;
+      el.style.fontSize = size + 'px';
+    }
+  });
+}
 const elBtnRow    = () => document.getElementById('btn-row');
