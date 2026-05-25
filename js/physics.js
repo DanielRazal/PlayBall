@@ -126,28 +126,43 @@ function applyPlayerInput(p) {
 // ─── AI ───────────────────────────────────────────────────────────────────────
 
 const AI_LEVELS = {
-  //        frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius
-  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 70, pressRadius: 28 },
-  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65, pressRadius: 45 },
-  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 55, pressRadius: 65 },
+  //              frameSkip  speedMult  posRadius  noise  predictFrames  aimOffset  aimRefresh  defendOffset  pressRadius  interceptFrames
+  easy:   { frameSkip: 5, speedMult: 0.68, posRadius: 130, noise: 38, predictFrames: 6,  aimOffset: 18, aimRefresh: 40, defendOffset: 70, pressRadius: 28, interceptFrames: 0  },
+  medium: { frameSkip: 3, speedMult: 0.88, posRadius: 90,  noise: 10, predictFrames: 28, aimOffset: 42, aimRefresh: 25, defendOffset: 65, pressRadius: 45, interceptFrames: 35 },
+  hard:   { frameSkip: 1, speedMult: 1.10, posRadius: 70,  noise: 0,  predictFrames: 60, aimOffset: 62, aimRefresh: 12, defendOffset: 55, pressRadius: 65, interceptFrames: 90 },
 };
 
-// Simulate ball position accounting for wall bounces and friction
+// Simulate ball with wall bounces and actual physics constants
 function _predictBall(b, frames) {
   if (frames === 0) return { x: b.x, y: b.y };
   let x = b.x, y = b.y, vx = b.vx, vy = b.vy;
   for (let i = 0; i < frames; i++) {
     x += vx; y += vy;
-    vx *= 0.985; vy *= 0.985;
-    if (y <= FIELD.top    + BALL_R) { y = FIELD.top    + BALL_R; vy =  Math.abs(vy); }
-    if (y >= FIELD.bottom - BALL_R) { y = FIELD.bottom - BALL_R; vy = -Math.abs(vy); }
-    if (x <= FIELD.left   + BALL_R) { x = FIELD.left   + BALL_R; vx =  Math.abs(vx); }
-    if (x >= FIELD.right  - BALL_R) { x = FIELD.right  - BALL_R; vx = -Math.abs(vx); }
+    vx *= FRICTION_BALL; vy *= FRICTION_BALL;
+    if (y <= FIELD.top    + BALL_R) { y = FIELD.top    + BALL_R; vy =  Math.abs(vy) * RESTITUTION_DEFAULT; }
+    if (y >= FIELD.bottom - BALL_R) { y = FIELD.bottom - BALL_R; vy = -Math.abs(vy) * RESTITUTION_DEFAULT; }
+    if (x <= FIELD.left   + BALL_R) { x = FIELD.left   + BALL_R; vx =  Math.abs(vx) * RESTITUTION_DEFAULT; }
+    if (x >= FIELD.right  - BALL_R) { x = FIELD.right  - BALL_R; vx = -Math.abs(vx) * RESTITUTION_DEFAULT; }
   }
   return { x, y };
 }
 
-// Stable aim target — refreshed every ~30 frames so the AI commits to a corner
+// Find the earliest point on ball's trajectory the AI can physically reach
+function _findIntercept(b, fromX, fromY, aiMaxSpd) {
+  let bx = b.x, by = b.y, bvx = b.vx, bvy = b.vy;
+  for (let t = 1; t <= 90; t++) {
+    bx += bvx; by += bvy;
+    bvx *= FRICTION_BALL; bvy *= FRICTION_BALL;
+    if (by <= FIELD.top    + BALL_R) { by = FIELD.top    + BALL_R; bvy =  Math.abs(bvy) * RESTITUTION_DEFAULT; }
+    if (by >= FIELD.bottom - BALL_R) { by = FIELD.bottom - BALL_R; bvy = -Math.abs(bvy) * RESTITUTION_DEFAULT; }
+    if (bx <= FIELD.left   + BALL_R) { bx = FIELD.left   + BALL_R; bvx =  Math.abs(bvx) * RESTITUTION_DEFAULT; }
+    if (bx >= FIELD.right  - BALL_R) { bx = FIELD.right  - BALL_R; bvx = -Math.abs(bvx) * RESTITUTION_DEFAULT; }
+    if (Math.hypot(bx - fromX, by - fromY) <= aiMaxSpd * t * 1.3) return { x: bx, y: by };
+  }
+  return { x: bx, y: by };
+}
+
+// Stable aim target — refreshed on a timer so AI commits to a corner
 let _aiAimY    = 0;
 let _aiAimTimer = 30;
 
@@ -164,20 +179,20 @@ function applyAIInput(p) {
   // ── Aim refresh ───────────────────────────────────────────────────────────────
   if (++_aiAimTimer >= cfg.aimRefresh) {
     _aiAimTimer = 0;
+    const humanY     = humanP ? humanP.y : FIELD.centerY;
+    const topCorner  = GOAL_TOP() + 18;
+    const botCorner  = GOAL_BOT() - 18;
+    const openCorner = Math.abs(humanY - topCorner) > Math.abs(humanY - botCorner) ? topCorner : botCorner;
     if (cfg.noise === 0) {
-      const humanY    = humanP ? humanP.y : FIELD.centerY;
-      const topCorner = GOAL_TOP() + 18;
-      const botCorner = GOAL_BOT() - 18;
-      const openCorner = Math.abs(humanY - topCorner) > Math.abs(humanY - botCorner) ? topCorner : botCorner;
-      // 30% chance: wall-bounce shot
-      if (Math.random() < 0.30) {
-        _aiAimY = openCorner < FIELD.centerY
-          ? 2 * FIELD.top    - openCorner
-          : 2 * FIELD.bottom - openCorner;
-      } else {
-        _aiAimY = openCorner;
-      }
+      // Hard: aim open corner precisely, 30% wall-bounce
+      _aiAimY = Math.random() < 0.30
+        ? (openCorner < FIELD.centerY ? 2 * FIELD.top - openCorner : 2 * FIELD.bottom - openCorner)
+        : openCorner;
+    } else if (cfg.noise <= 10) {
+      // Medium: open corner with imprecision
+      _aiAimY = openCorner + (Math.random() - 0.5) * cfg.noise * 4;
     } else {
+      // Easy: rough random aim
       _aiAimY = FIELD.centerY + (Math.random() > 0.5 ? 1 : -1) * cfg.aimOffset;
     }
   }
@@ -190,8 +205,11 @@ function applyAIInput(p) {
 
   k.up = k.down = k.left = k.right = false;
 
-  // ── Ball prediction ───────────────────────────────────────────────────────────
-  const pred = cfg.noise === 0
+  // ── Prediction & intercept ────────────────────────────────────────────────────
+  const aiMaxSpd  = PLAYER_MAX_SPD * cfg.speedMult;
+  const intercept = cfg.interceptFrames > 0 ? _findIntercept(b, p.x, p.y, aiMaxSpd) : null;
+
+  const pred      = cfg.noise === 0
     ? _predictBall(b, cfg.predictFrames)
     : { x: b.x + b.vx * cfg.predictFrames, y: b.y + b.vy * cfg.predictFrames };
   const predBallX = Math.max(FIELD.left+BALL_R, Math.min(FIELD.right-BALL_R, pred.x));
@@ -215,51 +233,61 @@ function applyAIInput(p) {
   let targetX, targetY;
 
   if (ballDist < cfg.posRadius) {
-    if (dangerZone) {
-      // CLEAR — stand between ball and own goal, kick away
+    if (dangerZone && !ballMovingAway) {
+      // CLEAR — get between ball and own goal; kick ball sideways to safety
       const clearY = b.y > FIELD.centerY ? -1 : 1;
       targetX = b.x + sign * (BALL_R + PLAYER_R + 6);
       targetY = b.y + clearY * (BALL_R + PLAYER_R + 6);
     } else {
-      // SHOOT — approach ball from correct side before kicking
+      // SHOOT — approach from correct side, then aim at goal corner
       const wrongSide = p.team === 'blue' ? p.x < b.x - PLAYER_R : p.x > b.x + PLAYER_R;
       if (wrongSide) {
-        // Detour: get behind ball diagonally to avoid pushing it the wrong way
         const sideOff = (p.y < b.y ? 1 : -1) * (BALL_R + PLAYER_R + 8);
         targetX = b.x + sign * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
         targetY = b.y + sideOff + (Math.random() - 0.5) * cfg.noise;
       } else {
-        const btgX   = oppGoalX - b.x;
-        const btgY   = _aiAimY  - b.y;
+        const btgX = oppGoalX - b.x, btgY = _aiAimY - b.y;
         const btgLen = Math.hypot(btgX, btgY) || 1;
         targetX = b.x - (btgX / btgLen) * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
         targetY = b.y - (btgY / btgLen) * (BALL_R + PLAYER_R + 6) + (Math.random() - 0.5) * cfg.noise;
       }
     }
   } else if (goalieSituation) {
-    // GOALIE — stand in goal mouth and track ball's Y to block shots
+    // GOALIE — stand in goal mouth; tracking accuracy scales with difficulty
     targetX = ownGoalX - sign * (PLAYER_R + 6);
-    targetY = Math.max(GOAL_TOP() + PLAYER_R, Math.min(GOAL_BOT() - PLAYER_R, b.y));
+    const trackFrac  = cfg.noise === 0 ? 1.0 : cfg.noise <= 10 ? 0.75 : 0.5;
+    const goalTrackY = FIELD.centerY + (b.y - FIELD.centerY) * trackFrac;
+    targetY = Math.max(GOAL_TOP() + PLAYER_R, Math.min(GOAL_BOT() - PLAYER_R,
+      goalTrackY + (Math.random() - 0.5) * cfg.noise * 0.6));
   } else if (ballThreat) {
-    // EMERGENCY — rush to intercept ball heading for own goal
-    targetX = predBallX + (Math.random() - 0.5) * cfg.noise * 0.5;
-    targetY = predBallY + (Math.random() - 0.5) * cfg.noise * 0.5;
+    // EMERGENCY — intercept ball on its actual trajectory (not just predicted end-position)
+    const ipt = intercept ?? { x: predBallX, y: predBallY };
+    targetX = ipt.x + (Math.random() - 0.5) * cfg.noise * 0.5;
+    targetY = ipt.y + (Math.random() - 0.5) * cfg.noise * 0.5;
   } else if (shouldPress) {
-    // PRESS — rush to challenge human and steal the ball
-    targetX = b.x + (Math.random() - 0.5) * cfg.noise * 0.5;
-    targetY = b.y + (Math.random() - 0.5) * cfg.noise * 0.5;
+    // PRESS — defensive (own half): get between ball and goal to clear
+    //         offensive (opp half): approach from shooting angle for immediate shot
+    if (ballInOwnHalf) {
+      targetX = b.x + sign * (BALL_R + PLAYER_R + 4) + (Math.random() - 0.5) * cfg.noise * 0.5;
+      targetY = b.y + (Math.random() - 0.5) * cfg.noise * 0.5;
+    } else {
+      const ptgX = oppGoalX - b.x, ptgY = _aiAimY - b.y;
+      const ptgLen = Math.hypot(ptgX, ptgY) || 1;
+      targetX = b.x - (ptgX / ptgLen) * (BALL_R + PLAYER_R + 5) + (Math.random() - 0.5) * cfg.noise;
+      targetY = b.y - (ptgY / ptgLen) * (BALL_R + PLAYER_R + 5) + (Math.random() - 0.5) * cfg.noise;
+    }
   } else if (ballInOwnHalf && !ballMovingAway) {
-    // DEFEND — cover shooting angle: position along ball→goal vector at ~55% depth
-    const toGoalX   = ownGoalX - b.x;
-    const toGoalY   = FIELD.centerY - b.y;
+    // DEFEND — cover shooting angle along ball→goal vector at ~55% depth
+    const toGoalX = ownGoalX - b.x, toGoalY = FIELD.centerY - b.y;
     const toGoalLen = Math.hypot(toGoalX, toGoalY) || 1;
     const coverDist = Math.min(toGoalLen * 0.55, cfg.defendOffset);
     targetX = b.x + (toGoalX / toGoalLen) * coverDist + (Math.random() - 0.5) * cfg.noise;
     targetY = b.y + (toGoalY / toGoalLen) * coverDist + (Math.random() - 0.5) * cfg.noise;
   } else {
-    // ATTACK / FOLLOW-UP — run to shooting position behind predicted ball
-    targetX = predBallX + sign * (BALL_R + PLAYER_R) + (Math.random() - 0.5) * cfg.noise;
-    targetY = predBallY + (Math.random() - 0.5) * cfg.noise;
+    // ATTACK — run to intercept point and arrive in shooting position behind ball
+    const ipt = intercept ?? { x: predBallX, y: predBallY };
+    targetX = ipt.x + sign * (BALL_R + PLAYER_R + 4) + (Math.random() - 0.5) * cfg.noise;
+    targetY = ipt.y + (Math.random() - 0.5) * cfg.noise;
   }
 
   targetX = Math.max(FIELD.left + PLAYER_R, Math.min(FIELD.right - PLAYER_R, targetX));
@@ -295,21 +323,26 @@ function applyAIInput(p) {
 
   // ── Kick ──────────────────────────────────────────────────────────────────────
   if (ballDist < KICK_RANGE) {
-    const kickDirX = b.x - p.x;
-    const kickDirY = b.y - p.y;
-    const toGoalX  = oppGoalX - b.x;
-    const toGoalY  = _aiAimY  - b.y;
-    const dot      = kickDirX * toGoalX + kickDirY * toGoalY;
-    const mag      = (Math.hypot(kickDirX, kickDirY) || 1) * (Math.hypot(toGoalX, toGoalY) || 1);
-    const aligned  = dot / mag > 0.35;
-    const safeKick = (ownGoalX - b.x) * kickDirX < 0;
+    const kickDirX    = b.x - p.x;
+    const kickDirY    = b.y - p.y;
+    const toGoalX     = oppGoalX - b.x;
+    const toGoalY     = _aiAimY  - b.y;
+    const dot         = kickDirX * toGoalX + kickDirY * toGoalY;
+    const mag         = (Math.hypot(kickDirX, kickDirY) || 1) * (Math.hypot(toGoalX, toGoalY) || 1);
+    const aligned     = dot / mag > 0.35;
+    const safeKick    = (ownGoalX - b.x) * kickDirX < 0;
+    // Ball already in front of open opponent goal — any safe kick scores
+    const oppGoalDist = p.team === 'blue' ? b.x - FIELD.left : FIELD.right - b.x;
+    const nearOppGoal = oppGoalDist < 90 && inGoalVertical;
 
     if (cfg.predictFrames <= 6) {
-      k.kick = true;
+      k.kick = true;                                                        // Easy: always kick
+    } else if (nearOppGoal) {
+      k.kick = safeKick;                                                    // Open goal: tap it in
     } else if (cfg.noise > 0) {
       k.kick = dangerZone ? safeKick : (safeKick && aligned) || Math.random() > 0.80;
     } else {
-      k.kick = dangerZone ? safeKick : (safeKick && aligned);
+      k.kick = dangerZone ? safeKick : (safeKick && aligned);              // Hard: smart kick only
     }
   } else {
     k.kick = false;
